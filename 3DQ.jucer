@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="dkV32Y" name="3DQ" projectType="audioplug" jucerVersion="5.4.1"
+              pluginFormats="buildStandalone,buildVST,buildVST3" cppLanguageStandard="latest"
+              defines="JUCE_OPENGL3 = 1" headerPath="..\..\Source">
+  <MAINGROUP id="RsPahE" name="3DQ">
+    <GROUP id="{7CC64696-3AE9-014B-61FC-DFE305843A03}" name="Resources">
+      <FILE id="vlytu9" name="Background.png" compile="0" resource="1" file="Resources/Background.png"/>
+    </GROUP>
+    <GROUP id="{6B398900-1215-DC58-8B38-3EDA5E4D4335}" name="Source">
+      <GROUP id="{EA8D9CAF-0943-66C4-B603-4B8FC4CEA390}" name="DSP">
+        <FILE id="WEVKCG" name="Filters.h" compile="0" resource="0" file="Source/DSP/Filters.h"/>
+      </GROUP>
+      <GROUP id="{C3FAF0C4-8293-323C-1137-E9D66AEB1659}" name="Utilities">
+        <FILE id="KKWJBk" name="DraggableOrbitCamera.h" compile="0" resource="0"
+              file="Source/Utilities/DraggableOrbitCamera.h"/>
+        <FILE id="b22CxN" name="FrequencyAxis.h" compile="0" resource="0" file="Source/Utilities/FrequencyAxis.h"/>
+        <FILE id="Jzyxma" name="LockFreeQueue.h" compile="0" resource="0" file="Source/Utilities/LockFreeQueue.h"/>
+        <FILE id="ssxnIK" name="Math.h" compile="0" resource="0" file="Source/Utilities/Math.h"/>
+        <FILE id="Aur3WJ" name="NormalizedRange.h" compile="0" resource="0"
+              file="Source/Utilities/NormalizedRange.h"/>
+        <FILE id="oPEBfW" name="RingBuffer.h" compile="0" resource="0" file="Source/Utilities/RingBuffer.h"/>
+      </GROUP>
+      <GROUP id="{ADB14A6B-93A5-9278-F89D-99B5E236B8F7}" name="Visualizers">
+        <FILE id="KeAMhb" name="Spectrogram.cpp" compile="1" resource="0" file="Source/Visualizers/Spectrogram.cpp"/>
+        <FILE id="EBOVtU" name="Spectrogram.h" compile="0" resource="0" file="Source/Visualizers/Spectrogram.h"/>
+        <FILE id="JO1m7x" name="Spectrogram2D.cpp" compile="1" resource="0"
+              file="Source/Visualizers/Spectrogram2D.cpp"/>
+        <FILE id="tmcaGD" name="Spectrogram2D.h" compile="0" resource="0" file="Source/Visualizers/Spectrogram2D.h"/>
+        <FILE id="E7MKzU" name="Spectrogram3D.cpp" compile="1" resource="0"
+              file="Source/Visualizers/Spectrogram3D.cpp"/>
+        <FILE id="SrhH9u" name="Spectrogram3D.h" compile="0" resource="0" file="Source/Visualizers/Spectrogram3D.h"/>
+      </GROUP>
+      <FILE id="IEFVPL" name="MainComponent.cpp" compile="1" resource="0"
+            file="Source/MainComponent.cpp"/>
+      <FILE id="a24LBl" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
+      <FILE id="srZwtv" name="OpenGLComponent.cpp" compile="1" resource="0"
+            file="Source/OpenGLComponent.cpp"/>
+      <FILE id="mkh1PY" name="OpenGLComponent.h" compile="0" resource="0"
+            file="Source/OpenGLComponent.h"/>
+      <FILE id="i6SQGU" name="PluginEditor.cpp" compile="1" resource="0"
+            file="Source/PluginEditor.cpp"/>
+      <FILE id="Egpxk7" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+      <FILE id="Zfs0PP" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="Source/PluginProcessor.cpp"/>
+      <FILE id="AJnZj8" name="PluginProcessor.h" compile="0" resource="0"
+            file="Source/PluginProcessor.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <EXPORTFORMATS>
+    <VS2017 targetFolder="Builds/VisualStudio2017">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug"/>
+        <CONFIGURATION isDebug="0" name="Release"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../../../../../Downloads/Frameworks/msvc15/JUCE-5.4.1/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../../../../Downloads/Frameworks/msvc15/JUCE-5.4.1/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../../../../Downloads/Frameworks/msvc15/JUCE-5.4.1/modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="../../../../../Downloads/Frameworks/msvc15/JUCE-5.4.1/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../../../../Downloads/Frameworks/msvc15/JUCE-5.4.1/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../../../../Downloads/Frameworks/msvc15/JUCE-5.4.1/modules"/>
+        <MODULEPATH id="juce_core" path="../../../../../Downloads/Frameworks/msvc15/JUCE-5.4.1/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../../../../Downloads/Frameworks/msvc15/JUCE-5.4.1/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../../../../Downloads/Frameworks/msvc15/JUCE-5.4.1/modules"/>
+        <MODULEPATH id="juce_events" path="../../../../../Downloads/Frameworks/msvc15/JUCE-5.4.1/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../../../../Downloads/Frameworks/msvc15/JUCE-5.4.1/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../../../../Downloads/Frameworks/msvc15/JUCE-5.4.1/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../../../../Downloads/Frameworks/msvc15/JUCE-5.4.1/modules"/>
+        <MODULEPATH id="juce_opengl" path="../../../../../Downloads/Frameworks/msvc15/JUCE-5.4.1/modules"/>
+        <MODULEPATH id="juce_video" path="../../../../../Downloads/Frameworks/msvc15/JUCE-5.4.1/modules"/>
+        <MODULEPATH id="juce_dsp" path="../../../../../Downloads/Frameworks/msvc15/JUCE-5.4.1/modules"/>
+      </MODULEPATHS>
+    </VS2017>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="1"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_dsp" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_opengl" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_video" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+  </MODULES>
+  <LIVE_SETTINGS>
+    <WINDOWS/>
+  </LIVE_SETTINGS>
+  <JUCEOPTIONS JUCE_VST3_CAN_REPLACE_VST2="0" JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
+</JUCERPROJECT>
