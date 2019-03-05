@@ -103,10 +103,10 @@ private:
         UniformPtr projectionMatrix, viewMatrix;
     };
 
-    GLfloat xFreqWidth;					/// Frequency axis size.
-    GLfloat yAmpHeight;					/// Amplitude axis size.
-    GLfloat zTimeDepth;					/// Time axis size.
-	GLuint zTimeResolution;				/// Time axis resolution.
+    GLfloat m_xFreqWidth;				/// Frequency axis size.
+    GLfloat m_yAmpHeight;				/// Amplitude axis size.
+    GLfloat m_zTimeDepth;				/// Time axis size.
+	GLuint m_zTimeResolution;			/// Time axis resolution.
 
 	struct Vertex
 	{
@@ -115,13 +115,12 @@ private:
 		Vector3D<GLfloat> color;
 	};
 
-    std::vector<Vertex> vertices;		/// Vertices used by OpenGL.
-    std::vector<GLuint> indices;		/// Indices used by OpenGL.
-
-	GLuint VAO, VBO, EBO;				/// OpenGL buffers ID.
+    std::vector<Vertex> m_vertices;		/// Vertices used by OpenGL.
+    std::vector<GLuint> m_indices;		/// Indices used by OpenGL.
+	GLuint m_VAO, m_VBO, m_EBO;			/// OpenGL buffers ID.
 
     // GUI Interaction
-    DraggableOrbitCamera draggableOrientation;
+    DraggableOrbitCamera m_draggableOrientation;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Spectrogram3D)
 };

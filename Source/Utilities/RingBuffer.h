@@ -29,74 +29,74 @@ public:
         @param bufferSize   size of the audio buffer
      */
     RingBuffer(int numChannels, int bufferSize)
-        : audioBuffer(numChannels, bufferSize)
-        , abstractFifo(bufferSize + 1)
+        : m_audioBuffer(numChannels, bufferSize)
+        , m_abstractFifo(bufferSize + 1)
     {
     }
 
     bool writeSamples(AudioBuffer<Type>& buffer)
     {
-        if (abstractFifo.getFreeSpace() < buffer.getNumSamples())
+        if (m_abstractFifo.getFreeSpace() < buffer.getNumSamples())
             return false;
 
         int start1, size1, start2, size2;
-        abstractFifo.prepareToWrite(buffer.getNumSamples(), start1, size1, start2, size2);
+		m_abstractFifo.prepareToWrite(buffer.getNumSamples(), start1, size1, start2, size2);
         
         for (int i = 0; i < buffer.getNumChannels(); ++i)
         {
             if (size1 > 0)
             {
-                audioBuffer.copyFrom(i, start1, buffer.getReadPointer(i), size1);
+				m_audioBuffer.copyFrom(i, start1, buffer.getReadPointer(i), size1);
             }
 
             if (size2 > 0)
             {
-                audioBuffer.copyFrom(i, start2, buffer.getReadPointer(i) + size1, size2);
+				m_audioBuffer.copyFrom(i, start2, buffer.getReadPointer(i) + size1, size2);
             }
         }
 
-        abstractFifo.finishedWrite(size1 + size2);
+		m_abstractFifo.finishedWrite(size1 + size2);
         return true;
     }
 
     bool readSamples(AudioBuffer<Type>& buffer, double overlapRatio = 0.0)
     {
-        if (abstractFifo.getNumReady() < buffer.getNumSamples())
+        if (m_abstractFifo.getNumReady() < buffer.getNumSamples())
             return false;
 
         int start1, size1, start2, size2;
-        abstractFifo.prepareToRead(buffer.getNumSamples(), start1, size1, start2, size2);
+		m_abstractFifo.prepareToRead(buffer.getNumSamples(), start1, size1, start2, size2);
 
         for (int i = 0; i < buffer.getNumChannels(); ++i)
         {
             if (size1 > 0)
             {
-                buffer.copyFrom(i, 0, audioBuffer.getReadPointer(i, start1), size1);
+                buffer.copyFrom(i, 0, m_audioBuffer.getReadPointer(i, start1), size1);
             }
 
             if (size2 > 0)
             {
-                buffer.copyFrom(i, size1, audioBuffer.getReadPointer(i, start2), size2);
+                buffer.copyFrom(i, size1, m_audioBuffer.getReadPointer(i, start2), size2);
             }
         }
         
-        abstractFifo.finishedRead(static_cast<int>((size1 + size2) * (1.0 - overlapRatio)));
+		m_abstractFifo.finishedRead(static_cast<int>((size1 + size2) * (1.0 - overlapRatio)));
         return true;
     }
 
     void setVirtualSize(int readSize, int chunkCount = 10)
     {
         const int bufferSize = readSize * chunkCount;
-        if (bufferSize != abstractFifo.getTotalSize())
+        if (bufferSize != m_abstractFifo.getTotalSize())
         {
-            jassert(bufferSize <= audioBuffer.getNumSamples());
-            abstractFifo.setTotalSize(bufferSize + 1);
+            jassert(bufferSize <= m_audioBuffer.getNumSamples());
+			m_abstractFifo.setTotalSize(bufferSize + 1);
         }
     }
 
 private:
-    AbstractFifo abstractFifo;
-    AudioBuffer<Type> audioBuffer;
+    AbstractFifo m_abstractFifo;
+    AudioBuffer<Type> m_audioBuffer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RingBuffer)
 };

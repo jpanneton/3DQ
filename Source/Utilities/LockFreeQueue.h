@@ -180,5 +180,5 @@ private:
 	alignas(CACHE_LINE_SIZE) std::atomic<std::size_t> m_tail;
 
 	// Padding to avoid adjacent allocations to share cache line with tail
-	char padding_[CACHE_LINE_SIZE - sizeof(decltype(m_tail))];
+	char m_padding[CACHE_LINE_SIZE - sizeof(decltype(m_tail))];
 };

@@ -10,7 +10,7 @@
 
 Spectrogram3D::Spectrogram3D(RingBuffer<GLfloat>& ringBuffer, double sampleRate)
     : Spectrogram(ringBuffer, sampleRate, 250)
-    , draggableOrientation(10.0f)
+    , m_draggableOrientation(10.0f)
 {
 	m_backgroundColor = Colour::fromRGB(25, 25, 25);
 }
@@ -24,32 +24,32 @@ Spectrogram3D::~Spectrogram3D()
 void Spectrogram3D::initialise()
 {
     // Set sizing parameters
-    xFreqWidth = 3.0f;
-    yAmpHeight = 1.0f;
-    zTimeDepth = 3.0f;
+	m_xFreqWidth = 3.0f;
+	m_yAmpHeight = 1.0f;
+	m_zTimeDepth = 3.0f;
 
 	// Time resolution = frequency resolution
-    zTimeResolution = static_cast<GLuint>(m_frequencyAxis.getResolution());
+	m_zTimeResolution = static_cast<GLuint>(m_frequencyAxis.getResolution());
 
 	// Generate data
     initializeVertices();
     initializeIndices();
 
 	// Generate buffers
-	m_openGLContext.extensions.glGenVertexArrays(1, &VAO); // Vertex Array Object
-	m_openGLContext.extensions.glGenBuffers(1, &VBO); // Vertex Buffer Object
-	m_openGLContext.extensions.glGenBuffers(1, &EBO); // Element Buffer Object
+	m_openGLContext.extensions.glGenVertexArrays(1, &m_VAO); // Vertex Array Object
+	m_openGLContext.extensions.glGenBuffers(1, &m_VBO); // Vertex Buffer Object
+	m_openGLContext.extensions.glGenBuffers(1, &m_EBO); // Element Buffer Object
 
 	// Bind vertex array
-	m_openGLContext.extensions.glBindVertexArray(VAO);
+	m_openGLContext.extensions.glBindVertexArray(m_VAO);
 
 	// Bind vertex buffer
-	m_openGLContext.extensions.glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	m_openGLContext.extensions.glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_DYNAMIC_DRAW);
+	m_openGLContext.extensions.glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+	m_openGLContext.extensions.glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), m_vertices.data(), GL_DYNAMIC_DRAW);
 
 	// Bind element buffer
-	m_openGLContext.extensions.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	m_openGLContext.extensions.glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
+	m_openGLContext.extensions.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
+	m_openGLContext.extensions.glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_indices.size() * sizeof(GLuint), m_indices.data(), GL_STATIC_DRAW);
 
 	// Define how the data should be pushed to the vertex shader
 	m_openGLContext.extensions.glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
@@ -96,23 +96,23 @@ void Spectrogram3D::render()
     updateData();
 
     // Calculate new y values and shift old y values back
-    for (int i = static_cast<int>(vertices.size()); i --> 0;)
+    for (int i = static_cast<int>(m_vertices.size()); i --> 0;)
     {
         // For the first row of points, render the new height via the FFT
         if (i < m_frequencyAxis.getResolution())
         {
-            vertices[i].position.y = getFrequencyInfo(i).level;
+			m_vertices[i].position.y = getFrequencyInfo(i).level;
         }
         else // For the subsequent rows, shift back
         {
-            vertices[i].position.y = vertices[i - m_frequencyAxis.getResolution()].position.y;
+			m_vertices[i].position.y = m_vertices[i - m_frequencyAxis.getResolution()].position.y;
         }
 
-		vertices[i].color = m_colorMap.getColorAtPosition(1.0f - vertices[i].position.y);
+		m_vertices[i].color = m_colorMap.getColorAtPosition(1.0f - m_vertices[i].position.y);
     }
     
-	m_openGLContext.extensions.glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	m_openGLContext.extensions.glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_DYNAMIC_DRAW);
+	m_openGLContext.extensions.glBindBuffer(GL_ARRAY_BUFFER, m_VBO);
+	m_openGLContext.extensions.glBufferData(GL_ARRAY_BUFFER, m_vertices.size() * sizeof(Vertex), m_vertices.data(), GL_DYNAMIC_DRAW);
 
     // Setup the Uniforms for use in the Shader
     if (getUniforms()->projectionMatrix != nullptr)
@@ -124,54 +124,54 @@ void Spectrogram3D::render()
         scale.mat[0] = 2.0f;
         scale.mat[5] = 2.0f;
         scale.mat[10] = 2.0f;
-        Matrix3D<float> finalMatrix = scale * draggableOrientation.getViewMatrix();
+        Matrix3D<float> finalMatrix = scale * m_draggableOrientation.getViewMatrix();
         getUniforms()->viewMatrix->setMatrix4(finalMatrix.mat, 1, false);
     }
 
     // Draw the points
-	m_openGLContext.extensions.glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(indices.size()), GL_UNSIGNED_INT, 0);
+	m_openGLContext.extensions.glBindVertexArray(m_VAO);
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_indices.size()), GL_UNSIGNED_INT, 0);
 	m_openGLContext.extensions.glBindVertexArray(0);
 }
 
 void Spectrogram3D::shutdown()
 {
-    vertices.clear();
-    indices.clear();
+	m_vertices.clear();
+	m_indices.clear();
 }
 
 void Spectrogram3D::resized()
 {
-    draggableOrientation.setViewport(getLocalBounds());
+	m_draggableOrientation.setViewport(getLocalBounds());
 }
 
 void Spectrogram3D::mouseDown(const MouseEvent& e)
 {
-    draggableOrientation.mouseDown(e.getPosition());
+	m_draggableOrientation.mouseDown(e.getPosition());
 }
 
 void Spectrogram3D::mouseDrag(const MouseEvent& e)
 {
-    draggableOrientation.mouseDrag(e.getPosition());
+	m_draggableOrientation.mouseDrag(e.getPosition());
 }
 
 void Spectrogram3D::initializeVertices()
 {
 	const GLuint xFreqResolution = static_cast<GLuint>(m_frequencyAxis.getResolution());
-    vertices.reserve(m_frequencyAxis.getResolution() * zTimeResolution);
+	m_vertices.reserve(m_frequencyAxis.getResolution() * m_zTimeResolution);
 
     // Variables when setting x and z
-    const GLfloat xOffset = xFreqWidth / m_frequencyAxis.getResolution();
-    const GLfloat zOffset = zTimeDepth / zTimeResolution;
-    const GLfloat xStart = -(xFreqWidth / 2.0f);
-    const GLfloat zStart = -(zTimeDepth / 2.0f);
+    const GLfloat xOffset = m_xFreqWidth / m_frequencyAxis.getResolution();
+    const GLfloat zOffset = m_zTimeDepth / m_zTimeResolution;
+    const GLfloat xStart = -(m_xFreqWidth / 2.0f);
+    const GLfloat zStart = -(m_zTimeDepth / 2.0f);
 
     // Set all X and Z values
-    for (GLuint zTimeIndex = 0; zTimeIndex < zTimeResolution; ++zTimeIndex)
+    for (GLuint zTimeIndex = 0; zTimeIndex < m_zTimeResolution; ++zTimeIndex)
     {
         for (GLuint xFreqIndex = 0; xFreqIndex < xFreqResolution; ++xFreqIndex)
         {
-            vertices.emplace_back(xStart + xFreqIndex * xOffset, 0.0f, zStart + zTimeIndex * zOffset);
+			m_vertices.emplace_back(xStart + xFreqIndex * xOffset, 0.0f, zStart + zTimeIndex * zOffset);
         }
     }
 }
@@ -179,19 +179,19 @@ void Spectrogram3D::initializeVertices()
 void Spectrogram3D::initializeIndices()
 {
 	const GLuint xFreqResolution = static_cast<GLuint>(m_frequencyAxis.getResolution());
-    indices.reserve(6 * (xFreqResolution - 1) * (zTimeResolution - 1));
+	m_indices.reserve(6 * (xFreqResolution - 1) * (m_zTimeResolution - 1));
     
-    for (GLuint z = 0; z < zTimeResolution - 1; z++)
+    for (GLuint z = 0; z < m_zTimeResolution - 1; z++)
     {
         for (GLuint x = 0; x < xFreqResolution - 1; x++)
         {
             const GLuint index = z * xFreqResolution + x;
-            indices.push_back(index);
-            indices.push_back(index + 1);
-            indices.push_back(index + xFreqResolution);
-            indices.push_back(index + 1);
-            indices.push_back(index + xFreqResolution + 1);
-            indices.push_back(index + xFreqResolution);
+            m_indices.push_back(index);
+            m_indices.push_back(index + 1);
+            m_indices.push_back(index + xFreqResolution);
+            m_indices.push_back(index + 1);
+            m_indices.push_back(index + xFreqResolution + 1);
+            m_indices.push_back(index + xFreqResolution);
         }
     }
 }
