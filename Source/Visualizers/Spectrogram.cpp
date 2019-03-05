@@ -10,7 +10,8 @@
 
 Spectrogram::Spectrogram(RingBuffer<GLfloat>& ringBuffer, double sampleRate, int outputResolution)
     : OpenGLComponent(ringBuffer, fftSize, sampleRate, false)
-	, m_frequencyAxis(outputResolution, sampleRate)
+	, m_frequencyAxis(outputResolution, 20.0f, static_cast<float>(sampleRate) / 2) // Nyquist frequency
+	, m_colorMap(64)
     , m_forwardFFT(fftOrder)
     , m_window(fftSize, dsp::WindowingFunction<float>::hann)
 	, m_fftData(2 * fftSize, true)
@@ -23,6 +24,15 @@ Spectrogram::Spectrogram(RingBuffer<GLfloat>& ringBuffer, double sampleRate, int
     addAndMakeVisible(m_statusLabel);
 	m_statusLabel.setJustificationType(Justification::topLeft);
 	m_statusLabel.setFont(Font(14.0f));
+
+	// Default colormap
+	ColourGradient gradient;
+	gradient.addColour(0.0, Colours::white);
+	gradient.addColour(0.25, Colours::yellow);
+	gradient.addColour(0.50, Colours::red);
+	gradient.addColour(0.75, Colours::blue);
+	gradient.addColour(1.0, Colours::black);
+	m_colorMap.setGradient(gradient);
 }
 
 Spectrogram::~Spectrogram()

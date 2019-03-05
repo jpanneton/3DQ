@@ -13,12 +13,6 @@ Spectrogram2D::Spectrogram2D(RingBuffer<GLfloat>& ringBuffer, double sampleRate)
     , m_spectrogramImage(Image::RGB, m_frequencyAxis.getResolution(), m_frequencyAxis.getResolution(), true)
 {
 	m_backgroundColor = Colour::fromRGB(25, 25, 25);
-
-	m_colorMap.addColour(0.0, Colours::white);
-	m_colorMap.addColour(0.25, Colours::yellow);
-	m_colorMap.addColour(0.50, Colours::red);
-	m_colorMap.addColour(0.75, Colours::blue);
-	m_colorMap.addColour(1.0, Colours::black);
 }
 
 Spectrogram2D::~Spectrogram2D()
@@ -82,8 +76,8 @@ void Spectrogram2D::render()
 		const int j = m_frequencyAxis.getResolution() - y - 1;
 		// Colour::fromHSV(level, 1.0f, level, 1.0f)
 		// const Colour pixelColor = Colour::fromHSV((1.0f - frequencyInfo.level) * 0.3f, 1.0f, frequencyInfo.level, 1.0f);
-		const Colour pixelColor = m_colorMap.getColourAtPosition(1.0f - frequencyInfo.level);
-		m_spectrogramImage.setPixelAt(rightHandEdge, j, pixelColor);
+		const auto pixelColor = m_colorMap.getColorAtPosition(1.0f - frequencyInfo.level);
+		m_spectrogramImage.setPixelAt(rightHandEdge, j, Colour::fromFloatRGBA(pixelColor.x, pixelColor.y, pixelColor.z, 1.0f));
     }
     
     Rectangle<int> bounds(m_spectrogramImage.getWidth(), m_spectrogramImage.getHeight());

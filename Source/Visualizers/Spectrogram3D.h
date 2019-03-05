@@ -108,7 +108,13 @@ private:
     GLfloat zTimeDepth;					/// Time axis size.
 	GLuint zTimeResolution;				/// Time axis resolution.
 
-    using Vertex = Vector3D<GLfloat>;
+	struct Vertex
+	{
+		Vertex(GLfloat x, GLfloat y, GLfloat z) : position(x, y, z) {}
+		Vector3D<GLfloat> position;
+		Vector3D<GLfloat> color;
+	};
+
     std::vector<Vertex> vertices;		/// Vertices used by OpenGL.
     std::vector<GLuint> indices;		/// Indices used by OpenGL.
 

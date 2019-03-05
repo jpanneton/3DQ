@@ -7,6 +7,7 @@
 #pragma once
 
 #include "OpenGLComponent.h"
+#include "Utilities/ColorMap.h"
 #include "Utilities/FrequencyAxis.h"
 
 //--------------------------------------------------------------------------------------------
@@ -96,7 +97,7 @@ protected:
     // Overlay GUI
     Label m_statusLabel;					/// GUI label used to display various informations about the current state of the spectrogram.
     FrequencyAxis<float> m_frequencyAxis;	/// Frequency axis used for frequency data scaling.
-	ColourGradient m_colorMap;				/// Color gradient used as colormap for the normalized levels.
+	ColorMap m_colorMap;					/// Color map used for the normalized levels.
 
 	std::atomic_bool m_isMouseHover = {};	/// If true, the mouse is inside the display frame. If false, the mouse is out of bounds.
     Point<int> m_mousePosition;				/// Current mouse position in local coordinates.

@@ -54,6 +54,8 @@ void Spectrogram3D::initialise()
 	// Define how the data should be pushed to the vertex shader
 	m_openGLContext.extensions.glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
 	m_openGLContext.extensions.glEnableVertexAttribArray(0);
+	m_openGLContext.extensions.glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)sizeof(Vector3D<GLfloat>));
+	m_openGLContext.extensions.glEnableVertexAttribArray(1);
 
     glEnable(GL_DEPTH_TEST);
 }
@@ -99,16 +101,18 @@ void Spectrogram3D::render()
         // For the first row of points, render the new height via the FFT
         if (i < m_frequencyAxis.getResolution())
         {
-            vertices[i].y = getFrequencyInfo(i).level;
+            vertices[i].position.y = getFrequencyInfo(i).level;
         }
         else // For the subsequent rows, shift back
         {
-            vertices[i].y = vertices[i - m_frequencyAxis.getResolution()].y;
+            vertices[i].position.y = vertices[i - m_frequencyAxis.getResolution()].position.y;
         }
+
+		vertices[i].color = m_colorMap.getColorAtPosition(1.0f - vertices[i].position.y);
     }
     
 	m_openGLContext.extensions.glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	m_openGLContext.extensions.glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_DYNAMIC_DRAW);
+	m_openGLContext.extensions.glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_DYNAMIC_DRAW);
 
     // Setup the Uniforms for use in the Shader
     if (getUniforms()->projectionMatrix != nullptr)

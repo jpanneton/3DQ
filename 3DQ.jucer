@@ -12,6 +12,7 @@
         <FILE id="WEVKCG" name="Filters.h" compile="0" resource="0" file="Source/DSP/Filters.h"/>
       </GROUP>
       <GROUP id="{C3FAF0C4-8293-323C-1137-E9D66AEB1659}" name="Utilities">
+        <FILE id="IjjEpy" name="ColorMap.h" compile="0" resource="0" file="Source/Utilities/ColorMap.h"/>
         <FILE id="KKWJBk" name="DraggableOrbitCamera.h" compile="0" resource="0"
               file="Source/Utilities/DraggableOrbitCamera.h"/>
         <FILE id="b22CxN" name="FrequencyAxis.h" compile="0" resource="0" file="Source/Utilities/FrequencyAxis.h"/>

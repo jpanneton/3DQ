@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------
 // Name: FrequencyAxis.h
-// Author: Jérémi Panneton
+// Author: JÃ©rÃ©mi Panneton
 // Creation date: February 26th, 2019
 //--------------------------------------------------------------------------------------------
 
@@ -31,9 +31,9 @@ public:
 	/// @param[in] sampleRate				Sample rate.
 	//----------------------------------------------------------------------------------------
 	template<typename SizeType>
-	FrequencyAxis(SizeType resolution, double sampleRate)
+	FrequencyAxis(SizeType resolution, ValueType min, ValueType max)
 		: m_frequencyMap(resolution)
-		, m_frequencyRange(20.0f, static_cast<float>(sampleRate) / 2) // Nyquist frequency
+		, m_frequencyRange(min, max)
 		, m_distribution(Distribution::Logarithmic)
 	{
 		remapFrequencies();
@@ -78,7 +78,7 @@ public:
 
 	//----------------------------------------------------------------------------------------
 	/// Returns the mapped frequency at the specified index.
-	/// @param[in]							Index of the frequency (discrete position on the axis).
+	/// @param[in] index					Index of the frequency (discrete position on the axis).
 	/// @return								Frequency at the specified index.
 	//----------------------------------------------------------------------------------------
 	ValueType operator[](size_t index) const
@@ -93,6 +93,7 @@ private:
 	void remapFrequencies()
 	{
 		const size_t frequencyCount = m_frequencyMap.size();
+		jassert(frequencyCount > 0);
 
 		switch (m_distribution)
 		{
