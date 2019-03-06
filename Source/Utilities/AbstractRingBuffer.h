@@ -18,19 +18,6 @@
 //--------------------------------------------------------------------------------------------
 class AbstractRingBuffer
 {
-	//----------------------------------------------------------------------------------------
-	/// Wraps the information needed to perform the actual read or write operation.
-	/// Since it's a ring buffer, the requested block can span from the end of the buffer to the beginning.
-	/// So, the requested block is handled as two separate blocks.
-	//----------------------------------------------------------------------------------------
-	struct OperationResult
-	{
-		int startIndex1;	/// Index of the first part of the requested block.
-		int blockSize1;		/// Size of the first part of the requested block.
-		int startIndex2;	/// Index of the second part of the requested block (always 0).
-		int blockSize2;		/// Size of the second part of the requested block (0 if no second part).
-	};
-
 public:
 	//----------------------------------------------------------------------------------------
 	/// Constructor.
@@ -67,6 +54,19 @@ public:
 
 private:
 	//----------------------------------------------------------------------------------------
+	/// Wraps the information needed to perform the actual read or write operation.
+	/// Since it's a ring buffer, the requested block can span from the end of the buffer to the beginning.
+	/// So, the requested block is handled as two separate blocks.
+	//----------------------------------------------------------------------------------------
+	struct OperationResult
+	{
+		int startIndex1;	/// Index of the first part of the requested block.
+		int blockSize1;		/// Size of the first part of the requested block.
+		int startIndex2;	/// Index of the second part of the requested block (always 0).
+		int blockSize2;		/// Size of the second part of the requested block (0 if no second part).
+	};
+
+	//----------------------------------------------------------------------------------------
 	/// Returns the current read or write location of a block of data within the buffer.
 	/// When reading, the targeted buffer area should be the one filled with items.
 	/// When writing, the targeted buffer area should be the free space.
@@ -77,49 +77,9 @@ private:
 	//----------------------------------------------------------------------------------------
 	OperationResult generateResult(int firstIndex, int lastIndex, int blockSize) const noexcept;
 
-	//----------------------------------------------------------------------------------------
-	/// Updates the state of the virtual FIFO after the actual read or write operation.
-	/// When reading, the targeted buffer area should be the one filled with items.
-	/// When writing, the targeted buffer area should be the free space.
-	/// @param[in] cursor					Head if read operation. Tail if write operation.
-	/// @param[in] finalBlockSize			Final size of the block read or written.
-	//----------------------------------------------------------------------------------------
-	void finishOperation(std::atomic<int>& cursor, int finalBlockSize) const noexcept;
-
-	//----------------------------------------------------------------------------------------
-	/// Returns the location within the buffer at which an incoming block of data should be written.
-	/// If the requested number of items to write is too large, the remaining free space in the queue is used instead.
-	/// After the data has been actually written, finishedWrite() needs to be called.
-	/// @param[in] numToWrite               Number of items to write in the buffer (not guaranteed).
-	/// @return								Information needed to perform the actual write operation.
-	//----------------------------------------------------------------------------------------
-	OperationResult prepareToWrite(int numToWrite) const noexcept;
-
-	//----------------------------------------------------------------------------------------
-	/// Updates the state of the virtual FIFO after the actual write operation.
-	/// @param[in] numWritten               Final number of items written in the buffer.
-	//----------------------------------------------------------------------------------------
-	void finishedWrite(int numWritten) noexcept;
-
-	//----------------------------------------------------------------------------------------
-	/// Returns the location within the buffer from which the next block of data should be read.
-	/// If the requested number of items to read is too large, the remaining number of items in the queue is used instead.
-	/// After the data has been actually read, finishedRead() needs to be called.
-	/// @param[in] numToRead	            Number of items to read from the buffer (not guaranteed).
-	/// @return								Information needed to perform the actual read operation.
-	//----------------------------------------------------------------------------------------
-	OperationResult prepareToRead(int numToRead) const noexcept;
-
-	//----------------------------------------------------------------------------------------
-	/// Updates the state of the virtual FIFO after the actual read operation.
-	/// @param[in] numRead					Final number of items read from the buffer.
-	//----------------------------------------------------------------------------------------
-	void finishedRead(int numRead) noexcept;
-
 public:
 	//----------------------------------------------------------------------------------------
 	/// Performs a full read operation using this abstract buffer.
-	/// This is a safer way of calling prepareToRead and finishedRead manually.
 	/// @param[in] numToRead	            Number of items to read from the buffer (guaranteed).
 	/// @param[in] readOperation	        Actual read operation. The lambda should take an OperationResult as parameter (or auto) and return the final number of items read from the buffer.
 	/// @return								False if the requested number of items to read from the buffer is too large. True otherwise.
@@ -129,13 +89,34 @@ public:
 	{
 		if (numToRead > getNumReady())
 			return false;
-		finishedRead(readOperation(prepareToRead(numToRead)));
+
+		// Relaxed, because the writer thread will never change m_head
+		const auto head = m_head.load(std::memory_order_relaxed);
+		// Acquire, because the writer thread is the one that changes m_tail
+		const auto tail = m_tail.load(std::memory_order_acquire);
+
+		auto numReady = tail >= head ? (tail - head) : (getTotalSize() - (head - tail));
+		numToRead = jmin(numToRead, numReady);
+
+		// Perform the actual read operation
+		const int numRead = readOperation(generateResult(head, tail, numToRead));
+
+		// Update the state of the virtual FIFO
+		jassert(numRead >= 0 && numRead <= getTotalSize());
+		auto newHead = head + numRead;
+
+		if (newHead >= getTotalSize())
+		{
+			newHead -= getTotalSize();
+		}
+
+		// Release, because the writer thread may try to acquire m_head
+		m_head.store(newHead, std::memory_order_release);
 		return true;
 	}
 
 	//----------------------------------------------------------------------------------------
 	/// Performs a full write operation using this abstract buffer.
-	/// This is a safer way of calling prepareToWrite and finishedWrite manually.
 	/// @param[in] numToWrite	            Number of items to write in the buffer (guaranteed).
 	/// @param[in] writeOperation	        Actual write operation. The lambda should take an OperationResult as parameter (or auto) and return the final number of items written in the buffer.
 	/// @return								False if the requested number of items to write in the buffer is too large. True otherwise.
@@ -145,7 +126,29 @@ public:
 	{
 		if (numToWrite > getFreeSpace())
 			return false;
-		finishedWrite(writeOperation(prepareToWrite(numToWrite)));
+
+		// Relaxed, because the reader thread will never change m_tail
+		const auto tail = m_tail.load(std::memory_order_relaxed);
+		// Acquire, because the reader thread is the one that changes m_head
+		const auto head = m_head.load(std::memory_order_acquire);
+
+		auto freeSpace = tail >= head ? (getTotalSize() - (tail - head)) : (head - tail);
+		numToWrite = jmin(numToWrite, freeSpace - 1);
+
+		// Perform the actual write operation
+		const int numWritten = writeOperation(generateResult(tail, head, numToWrite));
+
+		// Update the state of the virtual FIFO
+		jassert(numWritten >= 0 && numWritten < getTotalSize());
+		auto newTail = tail + numWritten;
+
+		if (newTail >= getTotalSize())
+		{
+			newTail -= getTotalSize();
+		}
+
+		// Release, because the reader thread may try to acquire m_tail
+		m_tail.store(newTail, std::memory_order_release);
 		return true;
 	}
 
