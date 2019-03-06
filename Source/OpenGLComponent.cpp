@@ -6,7 +6,7 @@
 
 #include "OpenGLComponent.h"
 
-OpenGLComponent::OpenGLComponent(RingBuffer<GLfloat>& ringBuffer, int readSize, double sampleRate, bool continuousRepaint)
+OpenGLComponent::OpenGLComponent(RingBuffer<float>& ringBuffer, int readSize, double sampleRate, bool continuousRepaint)
     : m_backgroundColor(getLookAndFeel().findColour(ResizableWindow::backgroundColourId))
     , m_ringBuffer(ringBuffer)
 	, m_readBuffer(2, readSize)
@@ -61,7 +61,7 @@ void OpenGLComponent::renderOpenGL()
     jassert(OpenGLHelpers::isContextActive());
 
     // Setup Viewport
-    const float renderingScale = (float)m_openGLContext.getRenderingScale();
+    const double renderingScale = m_openGLContext.getRenderingScale();
     glViewport(0, 0, roundToInt(renderingScale * getWidth()), roundToInt(renderingScale * getHeight()));
 
     // Set background color

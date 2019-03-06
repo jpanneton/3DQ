@@ -24,7 +24,7 @@ protected:
     /// @param[in] sampleRate               Sample rate.
     /// @param[in] continuousRepaint        True if OpenGL should render at a constant rate. False if OpenGL should render only on repaint event.
     //----------------------------------------------------------------------------------------
-    OpenGLComponent(RingBuffer<GLfloat>& ringBuffer, int readSize, double sampleRate, bool continuousRepaint);
+    OpenGLComponent(RingBuffer<float>& ringBuffer, int readSize, double sampleRate, bool continuousRepaint);
 
     //----------------------------------------------------------------------------------------
     /// Destructor.

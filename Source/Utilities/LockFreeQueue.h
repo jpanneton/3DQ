@@ -166,10 +166,10 @@ public:
 	std::size_t capacity() const noexcept { return m_capacity; }
 
 private:
-	static constexpr size_t CACHE_LINE_SIZE = std::hardware_destructive_interference_size;
+	static constexpr std::size_t CACHE_LINE_SIZE = std::hardware_destructive_interference_size;
 
 	// Padding to avoid false sharing between slots and adjacent allocations
-	static constexpr size_t PADDING = (CACHE_LINE_SIZE - 1) / sizeof(T) + 1;
+	static constexpr std::size_t PADDING = (CACHE_LINE_SIZE - 1) / sizeof(T) + 1;
 
 private:
 	const std::size_t m_capacity;
@@ -179,6 +179,6 @@ private:
 	alignas(CACHE_LINE_SIZE) std::atomic<std::size_t> m_head;
 	alignas(CACHE_LINE_SIZE) std::atomic<std::size_t> m_tail;
 
-	// Padding to avoid adjacent allocations to share cache line with tail
+	// Padding to avoid adjacent allocations to the same cache line as tail
 	char m_padding[CACHE_LINE_SIZE - sizeof(decltype(m_tail))];
 };

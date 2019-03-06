@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "JuceHeader.h"
+#include "AbstractRingBuffer.h"
 
 /** A circular, lock-free buffer for multiple channels of audio.
 
@@ -19,10 +19,12 @@
     plus the number of samples written to the RingBuffer at any time never exceed
     the buffer size. This prevents read/write overlap.
 */
-template<class Type>
+template<typename T>
 class RingBuffer
 {
 public:
+	using ValueType = T;
+
     /** Initializes the RingBuffer with the specified channels and size.
 
         @param numChannels  number of channels of audio to store in buffer
@@ -34,54 +36,44 @@ public:
     {
     }
 
-    bool writeSamples(AudioBuffer<Type>& buffer)
+    bool writeSamples(AudioBuffer<ValueType>& buffer)
     {
-        if (m_abstractFifo.getFreeSpace() < buffer.getNumSamples())
-            return false;
+		return m_abstractFifo.write(buffer.getNumSamples(), [&](const auto& result)
+		{
+			for (int i = 0; i < buffer.getNumChannels(); ++i)
+			{
+				if (result.blockSize1 > 0)
+				{
+					m_audioBuffer.copyFrom(i, result.startIndex1, buffer.getReadPointer(i), result.blockSize1);
+				}
 
-        int start1, size1, start2, size2;
-		m_abstractFifo.prepareToWrite(buffer.getNumSamples(), start1, size1, start2, size2);
-        
-        for (int i = 0; i < buffer.getNumChannels(); ++i)
-        {
-            if (size1 > 0)
-            {
-				m_audioBuffer.copyFrom(i, start1, buffer.getReadPointer(i), size1);
-            }
-
-            if (size2 > 0)
-            {
-				m_audioBuffer.copyFrom(i, start2, buffer.getReadPointer(i) + size1, size2);
-            }
-        }
-
-		m_abstractFifo.finishedWrite(size1 + size2);
-        return true;
+				if (result.blockSize2 > 0)
+				{
+					m_audioBuffer.copyFrom(i, result.startIndex2, buffer.getReadPointer(i) + result.blockSize1, result.blockSize2);
+				}
+			}
+			return result.blockSize1 + result.blockSize2;
+		});
     }
 
-    bool readSamples(AudioBuffer<Type>& buffer, double overlapRatio = 0.0)
+    bool readSamples(AudioBuffer<ValueType>& buffer, double overlapRatio = 0.0)
     {
-        if (m_abstractFifo.getNumReady() < buffer.getNumSamples())
-            return false;
+		return m_abstractFifo.read(buffer.getNumSamples(), [&](const auto& result)
+		{
+			for (int i = 0; i < buffer.getNumChannels(); ++i)
+			{
+				if (result.blockSize1 > 0)
+				{
+					buffer.copyFrom(i, 0, m_audioBuffer.getReadPointer(i, result.startIndex1), result.blockSize1);
+				}
 
-        int start1, size1, start2, size2;
-		m_abstractFifo.prepareToRead(buffer.getNumSamples(), start1, size1, start2, size2);
-
-        for (int i = 0; i < buffer.getNumChannels(); ++i)
-        {
-            if (size1 > 0)
-            {
-                buffer.copyFrom(i, 0, m_audioBuffer.getReadPointer(i, start1), size1);
-            }
-
-            if (size2 > 0)
-            {
-                buffer.copyFrom(i, size1, m_audioBuffer.getReadPointer(i, start2), size2);
-            }
-        }
-        
-		m_abstractFifo.finishedRead(static_cast<int>((size1 + size2) * (1.0 - overlapRatio)));
-        return true;
+				if (result.blockSize2 > 0)
+				{
+					buffer.copyFrom(i, result.blockSize1, m_audioBuffer.getReadPointer(i, result.startIndex2), result.blockSize2);
+				}
+			}
+			return static_cast<int>((result.blockSize1 + result.blockSize2) * (1.0 - overlapRatio));
+		});
     }
 
     void setVirtualSize(int readSize, int chunkCount = 10)
@@ -95,8 +87,8 @@ public:
     }
 
 private:
-    AbstractFifo m_abstractFifo;
-    AudioBuffer<Type> m_audioBuffer;
+	AbstractRingBuffer m_abstractFifo;
+    AudioBuffer<ValueType> m_audioBuffer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RingBuffer)
 };
