@@ -1,6 +1,6 @@
 //--------------------------------------------------------------------------------------------
 // Name: RingBuffer.h
-// Author: Jérémi Panneton
+// Author: Jï¿½rï¿½mi Panneton
 // Creation date: January 31th, 2019
 //--------------------------------------------------------------------------------------------
 
@@ -97,8 +97,8 @@ public:
     }
 
 private:
-	AbstractRingBuffer m_abstractFifo;		/// Lock-free logic of the queue.
-    AudioBuffer<ValueType> m_audioBuffer;	/// Buffer containing the audio data.
+	AbstractRingBuffer m_abstractFifo;
+    AudioBuffer<ValueType> m_audioBuffer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RingBuffer)
 };
