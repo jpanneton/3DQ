@@ -8,8 +8,8 @@
 #include "DSP/Filters.h"
 #include <numeric>
 
-Spectrogram::Spectrogram(RingBuffer<GLfloat>& ringBuffer, double sampleRate, int outputResolution)
-    : OpenGLComponent(ringBuffer, fftSize, sampleRate, false)
+Spectrogram::Spectrogram(double sampleRate, int outputResolution)
+    : OpenGLComponent(fftSize, sampleRate, false)
 	, m_frequencyAxis(outputResolution, 20.0f, static_cast<float>(sampleRate) / 2) // Nyquist frequency
 	, m_colorMap(64)
     , m_forwardFFT(fftOrder)

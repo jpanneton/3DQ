@@ -8,8 +8,8 @@
 #include "DSP/Filters.h"
 #include <numeric>
 
-Spectrogram3D::Spectrogram3D(RingBuffer<GLfloat>& ringBuffer, double sampleRate)
-    : Spectrogram(ringBuffer, sampleRate, 250)
+Spectrogram3D::Spectrogram3D(double sampleRate)
+    : Spectrogram(sampleRate, 250)
     , m_draggableOrientation(10.0f)
 {
 	m_backgroundColor = Colour::fromRGB(25, 25, 25);

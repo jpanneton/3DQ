@@ -32,14 +32,11 @@ MainComponent::~MainComponent()
 
 void MainComponent::prepareToPlay(double sampleRate)
 {
-    // Setup 2 channels ring buffer
-	m_ringBuffer = std::make_unique<RingBuffer<float>>(2, static_cast<int>(sampleRate));
-
     // Create visualizers
-	m_spectrogram2D = std::make_unique<Spectrogram2D>(*m_ringBuffer, sampleRate);
+	m_spectrogram2D = std::make_unique<Spectrogram2D>(sampleRate);
     addChildComponent(m_spectrogram2D.get());
 
-	m_spectrogram3D = std::make_unique<Spectrogram3D>(*m_ringBuffer, sampleRate);
+	m_spectrogram3D = std::make_unique<Spectrogram3D>(sampleRate);
     addChildComponent(m_spectrogram3D.get());
 }
 
@@ -58,21 +55,14 @@ void MainComponent::releaseResources()
         removeChildComponent(m_spectrogram3D.get());
 		m_spectrogram3D = nullptr;
     }
-
-	m_ringBuffer = nullptr;
 }
 
 void MainComponent::processBlock(AudioBuffer<float>& buffer)
 {
-    if (m_startVisualizer)
-    {
-		m_ringBuffer->setVirtualSize(m_activeVisualizer->getReadSize());
-		m_activeVisualizer->start();
-		m_startVisualizer = false;
-    }
-
-    // Write to Ring Buffer
-	m_ringBuffer->writeSamples(buffer);
+	if (m_activeVisualizer)
+	{
+		m_activeVisualizer->processBlock(buffer);
+	}
 }
 
 void MainComponent::paint(Graphics& g)
@@ -115,7 +105,7 @@ void MainComponent::buttonClicked(Button* button)
 		m_spectrogram3D->stop();
 
 		m_activeVisualizer = m_spectrogram2D.get();
-		m_startVisualizer = true;
+		m_activeVisualizer->start();
         resized();
     }
     else if (button == &m_spectrogram3DButton)
@@ -130,7 +120,7 @@ void MainComponent::buttonClicked(Button* button)
 		m_spectrogram2D->stop();
 
 		m_activeVisualizer = m_spectrogram3D.get();
-		m_startVisualizer = true;
+		m_activeVisualizer->start();
         resized();
     }
 }

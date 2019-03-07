@@ -85,7 +85,6 @@ private:
 	std::unique_ptr<Spectrogram3D> m_spectrogram3D;
 
 	OpenGLComponent* m_activeVisualizer = nullptr;
-	std::atomic_bool m_startVisualizer = false;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };

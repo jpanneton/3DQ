@@ -19,11 +19,10 @@ class Spectrogram : public OpenGLComponent
 public:
     //----------------------------------------------------------------------------------------
     /// Constructor.
-    /// @param[in] ringBuffer               Reference to the audio thread's ring buffer.
     /// @param[in] sampleRate               Sample rate.
     /// @param[in] outputResolution         Frequency output resolution.
     //----------------------------------------------------------------------------------------
-    Spectrogram(RingBuffer<GLfloat>& ringBuffer, double sampleRate, int outputResolution);
+    Spectrogram(double sampleRate, int outputResolution);
 
     //----------------------------------------------------------------------------------------
     /// Destructor.

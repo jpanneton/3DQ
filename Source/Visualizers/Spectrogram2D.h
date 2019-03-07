@@ -17,10 +17,9 @@ class Spectrogram2D : public Spectrogram
 public:
     //----------------------------------------------------------------------------------------
     /// Constructor.
-    /// @param ringBuffer                   Reference to the audio thread's ring buffer.
     /// @param sampleRate                   Sample rate.
     //----------------------------------------------------------------------------------------
-    Spectrogram2D(RingBuffer<GLfloat>& ringBuffer, double sampleRate);
+    Spectrogram2D(double sampleRate);
 
     //----------------------------------------------------------------------------------------
     /// Destructor.

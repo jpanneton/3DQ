@@ -35,6 +35,7 @@ public:
 	//----------------------------------------------------------------------------------------
     bool writeSamples(const AudioBuffer<ValueType>& buffer)
     {
+		jassert(buffer.getNumChannels() == m_audioBuffer.getNumChannels());
 		return m_abstractFifo.write(buffer.getNumSamples(), [&](const auto& result)
 		{
 			for (int i = 0; i < buffer.getNumChannels(); ++i)
@@ -61,6 +62,7 @@ public:
 	//----------------------------------------------------------------------------------------
     bool readSamples(AudioBuffer<ValueType>& buffer, double overlapRatio = 0.0)
     {
+		jassert(buffer.getNumChannels() == m_audioBuffer.getNumChannels());
 		return m_abstractFifo.read(buffer.getNumSamples(), [&](const auto& result)
 		{
 			for (int i = 0; i < buffer.getNumChannels(); ++i)
@@ -86,7 +88,7 @@ public:
 	/// @param[in] readSize					Expected read size.
 	/// @param[in] chunkCount				Number of reads needed to traverse the whole ring buffer.
 	//----------------------------------------------------------------------------------------
-    void setVirtualSize(int readSize, int chunkCount = 10)
+    void setVirtualSize(int readSize, int chunkCount = 10) noexcept
     {
         const int bufferSize = readSize * chunkCount;
         if (bufferSize != m_abstractFifo.getTotalSize())
@@ -95,6 +97,14 @@ public:
 			m_abstractFifo.setTotalSize(bufferSize);
         }
     }
+
+	//----------------------------------------------------------------------------------------
+	/// Clears the queue. No reallocation is being done, but the logical size of the queue is resetted.
+	//----------------------------------------------------------------------------------------
+	void clear() noexcept
+	{
+		m_abstractFifo.reset();
+	}
 
 private:
 	AbstractRingBuffer m_abstractFifo;

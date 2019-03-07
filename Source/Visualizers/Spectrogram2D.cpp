@@ -8,8 +8,8 @@
 #include "DSP/Filters.h"
 #include <numeric>
 
-Spectrogram2D::Spectrogram2D(RingBuffer<GLfloat>& ringBuffer, double sampleRate)
-    : Spectrogram(ringBuffer, sampleRate, 512)
+Spectrogram2D::Spectrogram2D(double sampleRate)
+    : Spectrogram(sampleRate, 512)
     , m_spectrogramImage(Image::RGB, m_frequencyAxis.getResolution(), m_frequencyAxis.getResolution(), true)
 {
 	m_backgroundColor = Colour::fromRGB(25, 25, 25);

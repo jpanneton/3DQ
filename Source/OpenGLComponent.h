@@ -19,12 +19,11 @@ class OpenGLComponent : public Component, private OpenGLRenderer
 protected:
     //----------------------------------------------------------------------------------------
     /// Constructor.
-    /// @param[in] ringBuffer               Reference to the audio thread's ring buffer.
     /// @param[in] readSize                 Number of samples to read from the ring buffer before each render.
     /// @param[in] sampleRate               Sample rate.
     /// @param[in] continuousRepaint        True if OpenGL should render at a constant rate. False if OpenGL should render only on repaint event.
     //----------------------------------------------------------------------------------------
-    OpenGLComponent(RingBuffer<float>& ringBuffer, int readSize, double sampleRate, bool continuousRepaint);
+    OpenGLComponent(int readSize, double sampleRate, bool continuousRepaint);
 
     //----------------------------------------------------------------------------------------
     /// Destructor.
@@ -80,6 +79,12 @@ public:
     //----------------------------------------------------------------------------------------
     void stop();
 
+	//----------------------------------------------------------------------------------------
+	/// Called during playback to add the incoming audio blocks to the ring buffer.
+	/// @param[in] buffer					Incoming audio buffer.
+	//----------------------------------------------------------------------------------------
+	void processBlock(const AudioBuffer<float>& buffer);
+
     //----------------------------------------------------------------------------------------
     /// Returns the number of samples to read from the ring buffer before each render.
     /// Usually, this method should be called to adjust the virtual size of the ring buffer when the active component changes.
@@ -122,7 +127,7 @@ protected:
     std::unique_ptr<ShaderUniforms> m_uniforms;		/// Shader program's uniform variables.
     Colour m_backgroundColor;						/// Color used when clearing the viewport.
 
-    RingBuffer<float>& m_ringBuffer;	/// Reference to the audio thread's ring buffer (incoming audio data).
+    RingBuffer<float> m_ringBuffer;		/// Ring buffer that holds the incoming audio data.
     AudioBuffer<float> m_readBuffer;	/// Temporary buffer to store the latest ring buffer's audio frame.
 	const double m_sampleRate = 0.0;    /// Sample rate.
 

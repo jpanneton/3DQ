@@ -6,9 +6,9 @@
 
 #include "OpenGLComponent.h"
 
-OpenGLComponent::OpenGLComponent(RingBuffer<float>& ringBuffer, int readSize, double sampleRate, bool continuousRepaint)
+OpenGLComponent::OpenGLComponent(int readSize, double sampleRate, bool continuousRepaint)
     : m_backgroundColor(getLookAndFeel().findColour(ResizableWindow::backgroundColourId))
-    , m_ringBuffer(ringBuffer)
+	, m_ringBuffer(2, readSize * 10)
 	, m_readBuffer(2, readSize)
     , m_sampleRate(sampleRate)
 {
@@ -31,12 +31,19 @@ OpenGLComponent::~OpenGLComponent()
 
 void OpenGLComponent::start()
 {
+	m_ringBuffer.clear();
 	m_openGLContext.setContinuousRepainting(true);
 }
 
 void OpenGLComponent::stop()
 {
 	m_openGLContext.setContinuousRepainting(false);
+	m_ringBuffer.clear();
+}
+
+void OpenGLComponent::processBlock(const AudioBuffer<float>& buffer)
+{
+	m_ringBuffer.writeSamples(buffer);
 }
 
 int OpenGLComponent::getReadSize() const
@@ -48,6 +55,7 @@ void OpenGLComponent::shutdownOpenGL()
 {
 	m_openGLContext.setContinuousRepainting(false);
 	m_openGLContext.detach();
+	m_ringBuffer.clear();
 }
 
 void OpenGLComponent::newOpenGLContextCreated()
