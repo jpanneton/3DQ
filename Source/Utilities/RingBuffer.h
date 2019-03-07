@@ -8,35 +8,32 @@
 
 #include "AbstractRingBuffer.h"
 
-/** A circular, lock-free buffer for multiple channels of audio.
-
-    Supports a single writer (producer) and any number of readers (consumers).
-
-    Make sure that the number of samples read from the RingBuffer in every
-    readSamples() call is less than the bufferSize specified in the constructor.
-
-    Also, ensure that the number of samples read from the RingBuffer at any time
-    plus the number of samples written to the RingBuffer at any time never exceed
-    the buffer size. This prevents read/write overlap.
-*/
+//--------------------------------------------------------------------------------------------
+/// Single-reader single-writer lock-free FIFO.
+//--------------------------------------------------------------------------------------------
 template<typename T>
 class RingBuffer
 {
 public:
 	using ValueType = T;
 
-    /** Initializes the RingBuffer with the specified channels and size.
-
-        @param numChannels  number of channels of audio to store in buffer
-        @param bufferSize   size of the audio buffer
-     */
-    RingBuffer(int numChannels, int bufferSize)
-        : m_audioBuffer(numChannels, bufferSize)
-        , m_abstractFifo(bufferSize + 1)
+	//----------------------------------------------------------------------------------------
+	/// Constructor.
+	/// @param[in] channelCount				Number of buffers (one for each channel).
+	/// @param[in] bufferSize				Total size of one buffer.
+	//----------------------------------------------------------------------------------------
+    RingBuffer(int channelCount, int bufferSize)
+        : m_audioBuffer(channelCount, bufferSize)
+        , m_abstractFifo(bufferSize)
     {
     }
 
-    bool writeSamples(AudioBuffer<ValueType>& buffer)
+	//----------------------------------------------------------------------------------------
+	/// Adds audio data to the queue.
+	/// @param[in] buffer					Buffer containing audio data.
+	/// @return								False if the requested number of items to write in the buffer is too large. True otherwise.
+	//----------------------------------------------------------------------------------------
+    bool writeSamples(const AudioBuffer<ValueType>& buffer)
     {
 		return m_abstractFifo.write(buffer.getNumSamples(), [&](const auto& result)
 		{
@@ -56,6 +53,12 @@ public:
 		});
     }
 
+	//----------------------------------------------------------------------------------------
+	/// Pops audio data from the queue. Since it's a FIFO, the oldest data is retrieved.
+	/// @param[out] buffer					Buffer in which to store the audio data.
+	/// @param[in] overlapRatio				Ratio of data to keep in the queue after being read. If 0.0 (min value), all the requested data is read and removed from the queue. If 1.0 (max value), all the requested data is read and none is removed from the queue.
+	/// @return								False if the requested number of items to read from the buffer is too large. True otherwise.
+	//----------------------------------------------------------------------------------------
     bool readSamples(AudioBuffer<ValueType>& buffer, double overlapRatio = 0.0)
     {
 		return m_abstractFifo.read(buffer.getNumSamples(), [&](const auto& result)
@@ -76,19 +79,26 @@ public:
 		});
     }
 
+	//----------------------------------------------------------------------------------------
+	/// Sets the virtual size of the queue. No reallocation is being done, but the logical size of the queue is changed.
+	/// The new size is calculated by doing readSize * chunkCount. This size should be less than the real size of the buffer.
+	/// @warning							Not thread-safe! Shouldn't be called while reading or writing.
+	/// @param[in] readSize					Expected read size.
+	/// @param[in] chunkCount				Number of reads needed to traverse the whole ring buffer.
+	//----------------------------------------------------------------------------------------
     void setVirtualSize(int readSize, int chunkCount = 10)
     {
         const int bufferSize = readSize * chunkCount;
         if (bufferSize != m_abstractFifo.getTotalSize())
         {
             jassert(bufferSize <= m_audioBuffer.getNumSamples());
-			m_abstractFifo.setTotalSize(bufferSize + 1);
+			m_abstractFifo.setTotalSize(bufferSize);
         }
     }
 
 private:
-	AbstractRingBuffer m_abstractFifo;
-    AudioBuffer<ValueType> m_audioBuffer;
+	AbstractRingBuffer m_abstractFifo;		/// Lock-free logic of the queue.
+    AudioBuffer<ValueType> m_audioBuffer;	/// Buffer containing the audio data.
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RingBuffer)
 };
