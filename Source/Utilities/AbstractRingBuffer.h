@@ -27,8 +27,8 @@ public:
 
 	//----------------------------------------------------------------------------------------
 	/// Updates the total size of the buffer being managed.
-	/// @param[in] capacity					Total size of the buffer being managed.
 	/// @warning							Not thread-safe! Shouldn't be called while reading or writing.
+	/// @param[in] capacity					Total size of the buffer being managed.
 	//----------------------------------------------------------------------------------------
 	void setTotalSize(int capacity) noexcept;
 
@@ -87,16 +87,16 @@ public:
 	template<class Lambda>
 	bool read(int numToRead, Lambda readOperation)
 	{
-		if (numToRead > getNumReady())
-			return false;
-
 		// Relaxed, because the writer thread will never change m_head
 		const auto head = m_head.load(std::memory_order_relaxed);
 		// Acquire, because the writer thread is the one that changes m_tail
 		const auto tail = m_tail.load(std::memory_order_acquire);
 
-		auto numReady = tail >= head ? (tail - head) : (getTotalSize() - (head - tail));
-		numToRead = jmin(numToRead, numReady);
+		// Equivalent of calling getNumReady(), but faster since the atomic accesses
+		// are already done and more optimized
+		const auto numReady = (tail >= head ? tail - head : getTotalSize() - (head - tail));
+		if (numToRead > numReady)
+			return false;
 
 		// Perform the actual read operation
 		const int numRead = readOperation(generateResult(head, tail, numToRead));
@@ -124,16 +124,16 @@ public:
 	template<class Lambda>
 	bool write(int numToWrite, Lambda writeOperation)
 	{
-		if (numToWrite > getFreeSpace())
-			return false;
-
 		// Relaxed, because the reader thread will never change m_tail
 		const auto tail = m_tail.load(std::memory_order_relaxed);
 		// Acquire, because the reader thread is the one that changes m_head
 		const auto head = m_head.load(std::memory_order_acquire);
 
-		auto freeSpace = tail >= head ? (getTotalSize() - (tail - head)) : (head - tail);
-		numToWrite = jmin(numToWrite, freeSpace - 1);
+		// Equivalent of calling getFreeSpace(), but faster since the atomic accesses
+		// are already done and more optimized
+		const auto freeSpace = (tail >= head ? getTotalSize() - (tail - head) : head - tail) - 1;
+		if (numToWrite > freeSpace)
+			return false;
 
 		// Perform the actual write operation
 		const int numWritten = writeOperation(generateResult(tail, head, numToWrite));
