@@ -103,6 +103,7 @@ void MainComponent::buttonClicked(Button* button)
 		m_spectrogram2D->setVisible(buttonToggleState);
 
 		m_spectrogram3D->stop();
+		m_spectrogram2D->stop();
 
 		m_activeVisualizer = m_spectrogram2D.get();
 		m_activeVisualizer->start();
@@ -118,6 +119,7 @@ void MainComponent::buttonClicked(Button* button)
 		m_spectrogram3D->setVisible(buttonToggleState);
 
 		m_spectrogram2D->stop();
+		m_spectrogram3D->stop();
 
 		m_activeVisualizer = m_spectrogram3D.get();
 		m_activeVisualizer->start();

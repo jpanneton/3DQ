@@ -51,6 +51,14 @@ protected:
     //----------------------------------------------------------------------------------------
     virtual void createShaders() = 0;
 
+	//----------------------------------------------------------------------------------------
+	/// Implement this method to free any GL objects that you created for rendering (i.e. delete buffers).
+	/// The GL context is still active when this method is called.
+	/// @warning This method is called automatically and should never be called explicitly.
+	/// @note This method may be called more than once.
+	//----------------------------------------------------------------------------------------
+	virtual void shutdown() {};
+
     //----------------------------------------------------------------------------------------
     /// Implement this method to render stuff on the screen.
     /// Usually, this is done by setting uniform variables, reading audio data and pushing vertices to the buffers.
@@ -59,25 +67,17 @@ protected:
     //----------------------------------------------------------------------------------------
     virtual void render() = 0;
 
-    //----------------------------------------------------------------------------------------
-    /// Implement this method to free any GL objects that you created for rendering (i.e. delete buffers).
-    /// The GL context is still active when this method is called.
-    /// @warning This method is called automatically and should never be called explicitly.
-    /// @note This method may be called more than once.
-    //----------------------------------------------------------------------------------------
-    virtual void shutdown() {};
-
 public:
     //----------------------------------------------------------------------------------------
     /// Sets automatic rendering (constant rate).
     //----------------------------------------------------------------------------------------
-    void start();
+    void start() noexcept;
 
     //----------------------------------------------------------------------------------------
     /// Sets manual rendering (on repaint event).
     /// This usually stops rendering since user needs to explicitly call OpenGLContext::triggerRepaint().
     //----------------------------------------------------------------------------------------
-    void stop();
+    void stop() noexcept;
 
 	//----------------------------------------------------------------------------------------
 	/// Called during playback to add the incoming audio blocks to the ring buffer.
@@ -87,10 +87,9 @@ public:
 
     //----------------------------------------------------------------------------------------
     /// Returns the number of samples to read from the ring buffer before each render.
-    /// Usually, this method should be called to adjust the virtual size of the ring buffer when the active component changes.
     /// @return                             Number of samples to read from the ring buffer before each render.
     //----------------------------------------------------------------------------------------
-    int getReadSize() const;
+    int getReadSize() const noexcept;
 
 protected:
     //----------------------------------------------------------------------------------------
@@ -100,21 +99,7 @@ protected:
     struct ShaderUniforms
     {
     protected:
-        using UniformPtr = std::unique_ptr<OpenGLShaderProgram::Uniform>;
-
-        //------------------------------------------------------------------------------------
-        /// Creates a uniform variable and binds it to the shader program.
-        /// @param[in] openGLContext            OpenGL context. Usually the instance in OpenGLComponent.
-        /// @param[in] shaderProgram            Shader program. Usually the instance in OpenGLComponent.
-        /// @param[in] uniformName              Name of the corresponding uniform variable in the shader program.
-        /// @return                             Pointer to the uniform variable.
-        //------------------------------------------------------------------------------------
-        UniformPtr createUniform(const OpenGLContext& openGLContext, const OpenGLShaderProgram& shaderProgram, const char* uniformName)
-        {
-            if (openGLContext.extensions.glGetUniformLocation(shaderProgram.getProgramID(), uniformName) < 0)
-                return nullptr;
-            return std::make_unique<OpenGLShaderProgram::Uniform>(shaderProgram, uniformName);
-        }
+        using Uniform = OpenGLShaderProgram::Uniform;
     };
 
     //----------------------------------------------------------------------------------------

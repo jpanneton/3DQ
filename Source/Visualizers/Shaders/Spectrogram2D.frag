@@ -1,10 +1,13 @@
 R"(
 #version 330 core
 
+in vec2 texturePos;
 out vec4 color;
+
+uniform sampler2D imageTexture; // GL_TEXTURE0 (default)
 
 void main()
 {
-    color = vec4(1.0f, 0.0f, 2.0f, 1.0f);
+    color = texture2D(imageTexture, texturePos);
 }
 )"

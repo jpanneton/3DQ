@@ -39,6 +39,11 @@ protected:
     //----------------------------------------------------------------------------------------
     void createShaders() override;
 
+	//----------------------------------------------------------------------------------------
+	/// @see OpenGLComponent::shutdown.
+	//----------------------------------------------------------------------------------------
+	void shutdown() override;
+
     //----------------------------------------------------------------------------------------
     /// @see OpenGLComponent::render.
     //----------------------------------------------------------------------------------------
@@ -48,11 +53,6 @@ protected:
 	/// @see OpenGLComponent::resized.
 	//----------------------------------------------------------------------------------------
 	void resized() override;
-
-    //----------------------------------------------------------------------------------------
-    /// @see OpenGLComponent::shutdown.
-    //----------------------------------------------------------------------------------------
-    void shutdown() override;
 
     //----------------------------------------------------------------------------------------
     /// @see Component::mouseDown.
@@ -93,13 +93,13 @@ private:
     //----------------------------------------------------------------------------------------
     struct Uniforms : public ShaderUniforms
     {
-        Uniforms(OpenGLContext& openGLContext, OpenGLShaderProgram& shaderProgram)
+        Uniforms(OpenGLShaderProgram& shaderProgram)
+			: projectionMatrix(shaderProgram, "projectionMatrix")
+			, viewMatrix(shaderProgram, "viewMatrix")
         {
-            projectionMatrix = createUniform(openGLContext, shaderProgram, "projectionMatrix");
-            viewMatrix = createUniform(openGLContext, shaderProgram, "viewMatrix");
         }
 
-        UniformPtr projectionMatrix, viewMatrix;
+        Uniform projectionMatrix, viewMatrix;
     };
 
     GLfloat m_xFreqWidth;				/// Frequency axis size.

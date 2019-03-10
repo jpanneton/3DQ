@@ -29,13 +29,13 @@ OpenGLComponent::~OpenGLComponent()
     shutdownOpenGL();
 }
 
-void OpenGLComponent::start()
+void OpenGLComponent::start() noexcept
 {
 	m_ringBuffer.clear();
 	m_openGLContext.setContinuousRepainting(true);
 }
 
-void OpenGLComponent::stop()
+void OpenGLComponent::stop() noexcept
 {
 	m_openGLContext.setContinuousRepainting(false);
 	m_ringBuffer.clear();
@@ -46,7 +46,7 @@ void OpenGLComponent::processBlock(const AudioBuffer<float>& buffer)
 	m_ringBuffer.writeSamples(buffer);
 }
 
-int OpenGLComponent::getReadSize() const
+int OpenGLComponent::getReadSize() const noexcept
 {
     return m_readBuffer.getNumSamples();
 }
