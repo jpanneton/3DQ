@@ -110,8 +110,8 @@ private:
 
 	struct Vertex
 	{
-		Vector3D<GLfloat> position;
-		GLfloat uv[2];
+		Vector3D<GLfloat> position;		/// 3D position of the vertex.
+		GLfloat uv[3];					/// UV coordinates and a level scale factor.
 	};
 
     std::vector<Vertex> m_vertices;		/// Vertices used by OpenGL.

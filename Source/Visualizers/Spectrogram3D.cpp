@@ -10,8 +10,8 @@
 
 Spectrogram3D::Spectrogram3D(double sampleRate)
     : Spectrogram(sampleRate, 256)
-    , m_draggableOrientation(10.0f)
 	, m_spectrogramImage(Image::ARGB, m_frequencyAxis.getResolution(), m_frequencyAxis.getResolution(), false)
+	, m_draggableOrientation(10.0f)
 {
 	m_backgroundColor = Colour::fromRGB(25, 25, 25);
 }
@@ -54,7 +54,7 @@ void Spectrogram3D::initialise()
 
 	// Define how the data should be pushed to the vertex shader
 	m_openGLContext.extensions.glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
-	m_openGLContext.extensions.glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)sizeof(Vector3D<GLfloat>));
+	m_openGLContext.extensions.glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)sizeof(Vector3D<GLfloat>));
 	m_openGLContext.extensions.glEnableVertexAttribArray(0);
 	m_openGLContext.extensions.glEnableVertexAttribArray(1);
 
@@ -162,38 +162,56 @@ void Spectrogram3D::mouseDrag(const MouseEvent& e)
 void Spectrogram3D::initializeVertices()
 {
 	const GLuint xFreqResolution = static_cast<GLuint>(m_frequencyAxis.getResolution());
-	m_vertices.reserve(m_frequencyAxis.getResolution() * m_zTimeResolution);
+	m_vertices.reserve((xFreqResolution + 2) * (m_zTimeResolution + 2));
 
-    // Variables when setting x and z
     const GLfloat xOffset = m_xFreqWidth / m_frequencyAxis.getResolution();
     const GLfloat zOffset = m_zTimeDepth / m_zTimeResolution;
     const GLfloat xStart = +(m_xFreqWidth / 2.0f);
     const GLfloat zStart = -(m_zTimeDepth / 2.0f);
 
-    // Set all X and Z values
+	const auto addFreqAtTime = [&](GLuint xFreqIndex, GLuint zTimeIndex, bool ignoreLevel)
+	{
+		Vertex vertex;
+		vertex.position = { xStart - xFreqIndex * xOffset, 0.0f, zStart + zTimeIndex * zOffset };
+		vertex.uv[0] = static_cast<GLfloat>(xFreqIndex) / (xFreqResolution - 1);
+		vertex.uv[1] = static_cast<GLfloat>(zTimeIndex) / (m_zTimeResolution - 1);
+		vertex.uv[2] = ignoreLevel ? 0.0f : 1.0f;
+		m_vertices.push_back(std::move(vertex));
+	};
+
+	const auto addFreqRow = [&](GLuint zTimeIndex, bool ignoreLevel)
+	{
+		addFreqAtTime(0, zTimeIndex, true);
+		for (GLuint xFreqIndex = 0; xFreqIndex < xFreqResolution; ++xFreqIndex)
+		{
+			addFreqAtTime(xFreqIndex, zTimeIndex, ignoreLevel);
+		}
+		addFreqAtTime(xFreqResolution - 1, zTimeIndex, true);
+	};
+
+	// Generates a grid of (xFreqResolution + 2) * (zTimeResolution + 2) vertices
+	// The middle xFreqResolution * zTimeResolution grid is the actual data and
+	// the additional +2 is to add a border at level 0 around the grid so that
+	// the surface gets closed on all four sides
+	addFreqRow(0, true);
     for (GLuint zTimeIndex = 0; zTimeIndex < m_zTimeResolution; ++zTimeIndex)
     {
-        for (GLuint xFreqIndex = 0; xFreqIndex < xFreqResolution; ++xFreqIndex)
-        {
-			Vertex vertex;
-			vertex.position = { xStart - xFreqIndex * xOffset, 0.0f, zStart + zTimeIndex * zOffset };
-			vertex.uv[0] = static_cast<GLfloat>(xFreqIndex) / (xFreqResolution - 1);
-			vertex.uv[1] = static_cast<GLfloat>(zTimeIndex) / (m_zTimeResolution - 1);
-			m_vertices.push_back(std::move(vertex));
-        }
+		addFreqRow(zTimeIndex, false);
     }
+	addFreqRow(m_zTimeResolution - 1, true);
 }
 
 void Spectrogram3D::initializeIndices()
 {
-	const GLuint xFreqResolution = static_cast<GLuint>(m_frequencyAxis.getResolution());
-	m_indices.reserve(6 * (xFreqResolution - 1) * (m_zTimeResolution - 1));
+	const GLuint xFreqResolution = static_cast<GLuint>(m_frequencyAxis.getResolution()) + 2;
+	const GLuint zTimeResolution = m_zTimeResolution + 2;
+	m_indices.reserve(6 * (xFreqResolution - 1) * (zTimeResolution - 1));
     
-    for (GLuint z = 0; z < m_zTimeResolution - 1; z++)
+    for (GLuint zTimeIndex = 0; zTimeIndex < zTimeResolution - 1; ++zTimeIndex)
     {
-        for (GLuint x = 0; x < xFreqResolution - 1; x++)
+        for (GLuint xFreqIndex = 0; xFreqIndex < xFreqResolution - 1; ++xFreqIndex)
         {
-            const GLuint index = z * xFreqResolution + x;
+            const GLuint index = zTimeIndex * xFreqResolution + xFreqIndex;
             m_indices.push_back(index);
             m_indices.push_back(index + 1);
             m_indices.push_back(index + xFreqResolution);

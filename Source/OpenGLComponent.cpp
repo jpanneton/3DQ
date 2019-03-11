@@ -22,7 +22,7 @@ OpenGLComponent::OpenGLComponent(int readSize, double sampleRate, bool continuou
 OpenGLComponent::~OpenGLComponent()
 {
     // Before your subclass's destructor has completed, you must call
-    // shutdownOpenGL() to release the GL context. (Otherwise there's
+    // shutdownOpenGL() to release the GL context. Otherwise there's
     // a danger that it may invoke a GL callback on your class while
     // it's in the process of being deleted.
     jassert(!m_openGLContext.isAttached());
@@ -66,25 +66,22 @@ void OpenGLComponent::newOpenGLContextCreated()
 
 void OpenGLComponent::renderOpenGL()
 {
-    jassert(OpenGLHelpers::isContextActive());
+    jassert(m_openGLContext.isActive());
 
-    // Setup Viewport
+    // Setup viewport
     const double renderingScale = m_openGLContext.getRenderingScale();
     glViewport(0, 0, roundToInt(renderingScale * getWidth()), roundToInt(renderingScale * getHeight()));
 
     // Set background color
     OpenGLHelpers::clear(m_backgroundColor);
 
-    // Enable alpha blending
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     // Enable depth test
     glEnable(GL_DEPTH_TEST);
 
-    // Use Shader Program that's been defined
+    // Use shader program that's been defined
 	m_shader->use();
 
+	// Render component
     render();
 }
 
