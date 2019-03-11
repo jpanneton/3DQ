@@ -2,7 +2,8 @@
 
 <JUCERPROJECT id="dkV32Y" name="3DQ" projectType="audioplug" jucerVersion="5.4.1"
               pluginFormats="buildStandalone,buildVST,buildVST3" cppLanguageStandard="latest"
-              defines="JUCE_OPENGL3 = 1" headerPath="..\..\Source">
+              defines="JUCE_OPENGL3 = 1; JUCE_OPENGL_ALLOW_NON_POWER_OF_TWO_TEXTURES = 1"
+              headerPath="..\..\Source">
   <MAINGROUP id="RsPahE" name="3DQ">
     <GROUP id="{7CC64696-3AE9-014B-61FC-DFE305843A03}" name="Resources">
       <FILE id="vlytu9" name="Background.png" compile="0" resource="1" file="Resources/Background.png"/>

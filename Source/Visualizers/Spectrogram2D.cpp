@@ -10,7 +10,7 @@
 
 Spectrogram2D::Spectrogram2D(double sampleRate)
     : Spectrogram(sampleRate, 512)
-    , m_spectrogramImage(Image::RGB, m_frequencyAxis.getResolution(), m_frequencyAxis.getResolution(), true)
+    , m_spectrogramImage(Image::RGB, m_frequencyAxis.getResolution(), m_frequencyAxis.getResolution(), false)
 {
 	m_backgroundColor = Colour::fromRGB(25, 25, 25);
 }
@@ -44,6 +44,8 @@ void Spectrogram2D::initialise()
 	// Define how the data should be pushed to the vertex shader
 	m_openGLContext.extensions.glVertexAttribPointer(0, 2, GL_SHORT, GL_FALSE, 4, nullptr);
 	m_openGLContext.extensions.glEnableVertexAttribArray(0);
+
+	m_spectrogramImage.clear(m_spectrogramImage.getBounds(), Colours::black);
 }
 
 void Spectrogram2D::shutdown()
@@ -54,7 +56,6 @@ void Spectrogram2D::shutdown()
 	
 	// Clear data
 	m_spectrogramTexture.release();
-	m_spectrogramImage.clear(m_spectrogramImage.getBounds(), Colours::black);
 }
 
 void Spectrogram2D::createShaders()
@@ -107,8 +108,6 @@ void Spectrogram2D::render()
         }
 
 		const int j = m_frequencyAxis.getResolution() - y - 1;
-		// Colour::fromHSV(level, 1.0f, level, 1.0f)
-		// const Colour pixelColor = Colour::fromHSV((1.0f - frequencyInfo.level) * 0.3f, 1.0f, frequencyInfo.level, 1.0f);
 		const auto pixelColor = m_colorMap.getColorAtPosition(1.0f - frequencyInfo.level);
 		m_spectrogramImage.setPixelAt(rightHandEdge, j, Colour::fromFloatRGBA(pixelColor.x, pixelColor.y, pixelColor.z, 1.0f));
     }

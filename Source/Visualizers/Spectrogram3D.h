@@ -94,12 +94,13 @@ private:
     struct Uniforms : public ShaderUniforms
     {
         Uniforms(OpenGLShaderProgram& shaderProgram)
-			: projectionMatrix(shaderProgram, "projectionMatrix")
+			: imageTexture(shaderProgram, "imageTexture")
+			, projectionMatrix(shaderProgram, "projectionMatrix")
 			, viewMatrix(shaderProgram, "viewMatrix")
         {
         }
 
-        Uniform projectionMatrix, viewMatrix;
+        Uniform imageTexture, projectionMatrix, viewMatrix;
     };
 
     GLfloat m_xFreqWidth;				/// Frequency axis size.
@@ -109,13 +110,16 @@ private:
 
 	struct Vertex
 	{
-		Vertex(GLfloat x, GLfloat y, GLfloat z) : position(x, y, z) {}
 		Vector3D<GLfloat> position;
-		Vector3D<GLfloat> color;
+		GLfloat uv[2];
 	};
 
     std::vector<Vertex> m_vertices;		/// Vertices used by OpenGL.
     std::vector<GLuint> m_indices;		/// Indices used by OpenGL.
+
+	Image m_spectrogramImage;			/// Sliding spectrogram image (CPU).
+	OpenGLTexture m_spectrogramTexture;	/// Generated texture from the sliding spectrogram image (GPU).
+
 	GLuint m_VAO, m_VBO, m_EBO;			/// OpenGL buffers ID.
 
     // GUI Interaction

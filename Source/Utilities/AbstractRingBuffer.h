@@ -153,7 +153,7 @@ public:
 	}
 
 private:
-	// Cache line size used to align head and tail properly and avoid false sharing.
+	// Cache line size used to align head and tail properly and avoid false sharing
 	static constexpr size_t CACHE_LINE_SIZE = std::hardware_destructive_interference_size;
 
 	int m_bufferSize = 0;	/// Total size of the buffer being managed.

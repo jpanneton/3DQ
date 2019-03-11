@@ -8,6 +8,6 @@ uniform sampler2D imageTexture; // GL_TEXTURE0 (default)
 
 void main()
 {
-    color = texture2D(imageTexture, texturePos);
+    color = texture(imageTexture, texturePos);
 }
 )"
