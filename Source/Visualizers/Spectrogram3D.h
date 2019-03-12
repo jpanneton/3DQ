@@ -39,20 +39,20 @@ protected:
     //----------------------------------------------------------------------------------------
     void createShaders() override;
 
-	//----------------------------------------------------------------------------------------
-	/// @see OpenGLComponent::shutdown.
-	//----------------------------------------------------------------------------------------
-	void shutdown() override;
+    //----------------------------------------------------------------------------------------
+    /// @see OpenGLComponent::shutdown.
+    //----------------------------------------------------------------------------------------
+    void shutdown() override;
 
     //----------------------------------------------------------------------------------------
     /// @see OpenGLComponent::render.
     //----------------------------------------------------------------------------------------
     void render() override;
 
-	//----------------------------------------------------------------------------------------
-	/// @see OpenGLComponent::resized.
-	//----------------------------------------------------------------------------------------
-	void resized() override;
+    //----------------------------------------------------------------------------------------
+    /// @see OpenGLComponent::resized.
+    //----------------------------------------------------------------------------------------
+    void resized() override;
 
     //----------------------------------------------------------------------------------------
     /// @see Component::mouseDown.
@@ -68,23 +68,23 @@ private:
     //==========================================================================
     // Mesh Functions
 
-	//----------------------------------------------------------------------------------------
-	/// Creates a grid of vertices.
-	//----------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------
+    /// Creates a grid of vertices.
+    //----------------------------------------------------------------------------------------
     void initializeVertices();
 
-	//----------------------------------------------------------------------------------------
-	/// Generates the indices needed to form a surface from the vertex grid.
-	//----------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------
+    /// Generates the indices needed to form a surface from the vertex grid.
+    //----------------------------------------------------------------------------------------
     void initializeIndices();
 
     //==========================================================================
     // OpenGL Functions
 
-	//----------------------------------------------------------------------------------------
-	/// Calculates a projection matrix based on the window size and a default frustum.
-	/// @return								Projection matrix.
-	//----------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------
+    /// Calculates a projection matrix based on the window size and a default frustum.
+    /// @return								Projection matrix.
+    //----------------------------------------------------------------------------------------
     Matrix3D<float> getProjectionMatrix() const noexcept;
 
 private:
@@ -94,9 +94,9 @@ private:
     struct Uniforms : public ShaderUniforms
     {
         Uniforms(OpenGLShaderProgram& shaderProgram)
-			: imageTexture(shaderProgram, "imageTexture")
-			, projectionMatrix(shaderProgram, "projectionMatrix")
-			, viewMatrix(shaderProgram, "viewMatrix")
+            : imageTexture(shaderProgram, "imageTexture")
+            , projectionMatrix(shaderProgram, "projectionMatrix")
+            , viewMatrix(shaderProgram, "viewMatrix")
         {
         }
 
@@ -106,21 +106,21 @@ private:
     GLfloat m_xFreqWidth;				/// Frequency axis size.
     GLfloat m_yAmpHeight;				/// Amplitude axis size.
     GLfloat m_zTimeDepth;				/// Time axis size.
-	GLuint m_zTimeResolution;			/// Time axis resolution.
+    GLuint m_zTimeResolution;			/// Time axis resolution.
 
-	struct Vertex
-	{
-		Vector3D<GLfloat> position;		/// 3D position of the vertex.
-		GLfloat uv[3];					/// UV coordinates and a level scale factor.
-	};
+    struct Vertex
+    {
+        Vector3D<GLfloat> position;		/// 3D position of the vertex.
+        GLfloat uv[3];					/// UV coordinates and a level scale factor.
+    };
 
     std::vector<Vertex> m_vertices;		/// Vertices used by OpenGL.
     std::vector<GLuint> m_indices;		/// Indices used by OpenGL.
 
-	Image m_spectrogramImage;			/// Sliding spectrogram image (CPU).
-	OpenGLTexture m_spectrogramTexture;	/// Generated texture from the sliding spectrogram image (GPU).
+    Image m_spectrogramImage;			/// Sliding spectrogram image (CPU).
+    OpenGLTexture m_spectrogramTexture;	/// Generated texture from the sliding spectrogram image (GPU).
 
-	GLuint m_VAO, m_VBO, m_EBO;			/// OpenGL buffers ID.
+    GLuint m_VAO, m_VBO, m_EBO;			/// OpenGL buffers ID.
 
     // GUI Interaction
     DraggableOrbitCamera m_draggableOrientation;

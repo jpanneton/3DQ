@@ -93,14 +93,14 @@ void PluginProcessor::prepareToPlay(double sampleRate, int)
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-	m_visualizer.prepareToPlay(sampleRate);
+    m_visualizer.prepareToPlay(sampleRate);
 }
 
 void PluginProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
-	m_visualizer.releaseResources();
+    m_visualizer.releaseResources();
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -142,7 +142,7 @@ void PluginProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffer&)
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear(i, 0, buffer.getNumSamples());
 
-	m_visualizer.processBlock(buffer);
+    m_visualizer.processBlock(buffer);
 }
 
 //==============================================================================

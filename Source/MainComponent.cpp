@@ -23,7 +23,7 @@ MainComponent::MainComponent()
     m_spectrogram3DButton.addListener(this);
     m_spectrogram3DButton.setToggleState(false, NotificationType::dontSendNotification);
 
-	m_background = ImageCache::getFromMemory(BinaryData::Background_png, BinaryData::Background_pngSize);
+    m_background = ImageCache::getFromMemory(BinaryData::Background_png, BinaryData::Background_pngSize);
 }
 
 MainComponent::~MainComponent()
@@ -33,10 +33,10 @@ MainComponent::~MainComponent()
 void MainComponent::prepareToPlay(double sampleRate)
 {
     // Create visualizers
-	m_spectrogram2D = std::make_unique<Spectrogram2D>(sampleRate);
+    m_spectrogram2D = std::make_unique<Spectrogram2D>(sampleRate);
     addChildComponent(m_spectrogram2D.get());
 
-	m_spectrogram3D = std::make_unique<Spectrogram3D>(sampleRate);
+    m_spectrogram3D = std::make_unique<Spectrogram3D>(sampleRate);
     addChildComponent(m_spectrogram3D.get());
 }
 
@@ -44,25 +44,25 @@ void MainComponent::releaseResources()
 {
     if (m_spectrogram2D)
     {
-		m_spectrogram2D->stop();
+        m_spectrogram2D->stop();
         removeChildComponent(m_spectrogram2D.get());
-		m_spectrogram2D = nullptr;
+        m_spectrogram2D = nullptr;
     }
 
     if (m_spectrogram3D)
     {
-		m_spectrogram3D->stop();
+        m_spectrogram3D->stop();
         removeChildComponent(m_spectrogram3D.get());
-		m_spectrogram3D = nullptr;
+        m_spectrogram3D = nullptr;
     }
 }
 
 void MainComponent::processBlock(AudioBuffer<float>& buffer)
 {
-	if (m_activeVisualizer)
-	{
-		m_activeVisualizer->processBlock(buffer);
-	}
+    if (m_activeVisualizer)
+    {
+        m_activeVisualizer->processBlock(buffer);
+    }
 }
 
 void MainComponent::paint(Graphics& g)
@@ -82,13 +82,13 @@ void MainComponent::resized()
     const int bHeight = 20;
     const int bMargin = 10;
 
-	m_spectrogram2DButton.setBounds(bWidth + 2 * bMargin, h - 80, bWidth, bHeight);
-	m_spectrogram3DButton.setBounds(bWidth + 2 * bMargin, h - 40, bWidth, bHeight);
+    m_spectrogram2DButton.setBounds(bWidth + 2 * bMargin, h - 80, bWidth, bHeight);
+    m_spectrogram3DButton.setBounds(bWidth + 2 * bMargin, h - 40, bWidth, bHeight);
 
     if (m_spectrogram2D != nullptr)
-		m_spectrogram2D->setBounds(border, border, w - 2 * border, 509 - border);
+        m_spectrogram2D->setBounds(border, border, w - 2 * border, 509 - border);
     if (m_spectrogram3D != nullptr)
-		m_spectrogram3D->setBounds(border, border, w - 2 * border, 509 - border);
+        m_spectrogram3D->setBounds(border, border, w - 2 * border, 509 - border);
 }
 
 void MainComponent::buttonClicked(Button* button)
@@ -97,32 +97,32 @@ void MainComponent::buttonClicked(Button* button)
     {
         bool buttonToggleState = !button->getToggleState();
         button->setToggleState(buttonToggleState, NotificationType::dontSendNotification);
-		m_spectrogram3DButton.setToggleState(false, NotificationType::dontSendNotification);
+        m_spectrogram3DButton.setToggleState(false, NotificationType::dontSendNotification);
 
-		m_spectrogram3D->setVisible(false);
-		m_spectrogram2D->setVisible(buttonToggleState);
+        m_spectrogram3D->setVisible(false);
+        m_spectrogram2D->setVisible(buttonToggleState);
 
-		m_spectrogram3D->stop();
-		m_spectrogram2D->stop();
+        m_spectrogram3D->stop();
+        m_spectrogram2D->stop();
 
-		m_activeVisualizer = m_spectrogram2D.get();
-		m_activeVisualizer->start();
+        m_activeVisualizer = m_spectrogram2D.get();
+        m_activeVisualizer->start();
         resized();
     }
     else if (button == &m_spectrogram3DButton)
     {
         bool buttonToggleState = !button->getToggleState();
         button->setToggleState(buttonToggleState, NotificationType::dontSendNotification);
-		m_spectrogram2DButton.setToggleState(false, NotificationType::dontSendNotification);
+        m_spectrogram2DButton.setToggleState(false, NotificationType::dontSendNotification);
 
-		m_spectrogram2D->setVisible(false);
-		m_spectrogram3D->setVisible(buttonToggleState);
+        m_spectrogram2D->setVisible(false);
+        m_spectrogram3D->setVisible(buttonToggleState);
 
-		m_spectrogram2D->stop();
-		m_spectrogram3D->stop();
+        m_spectrogram2D->stop();
+        m_spectrogram3D->stop();
 
-		m_activeVisualizer = m_spectrogram3D.get();
-		m_activeVisualizer->start();
+        m_activeVisualizer = m_spectrogram3D.get();
+        m_activeVisualizer->start();
         resized();
     }
 }

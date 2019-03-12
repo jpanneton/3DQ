@@ -9,7 +9,7 @@
 
 PluginEditor::PluginEditor(PluginProcessor& processor)
     : AudioProcessorEditor(&processor)
-	, m_processor(processor)
+    , m_processor(processor)
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -31,5 +31,5 @@ void PluginEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
-	m_processor.m_visualizer.setBounds(getLocalBounds());
+    m_processor.m_visualizer.setBounds(getLocalBounds());
 }

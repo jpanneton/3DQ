@@ -51,13 +51,13 @@ protected:
     //----------------------------------------------------------------------------------------
     virtual void createShaders() = 0;
 
-	//----------------------------------------------------------------------------------------
-	/// Implement this method to free any GL objects that you created for rendering (i.e. delete buffers).
-	/// The GL context is still active when this method is called.
-	/// @warning This method is called automatically and should never be called explicitly.
-	/// @note This method may be called more than once.
-	//----------------------------------------------------------------------------------------
-	virtual void shutdown() {};
+    //----------------------------------------------------------------------------------------
+    /// Implement this method to free any GL objects that you created for rendering (i.e. delete buffers).
+    /// The GL context is still active when this method is called.
+    /// @warning This method is called automatically and should never be called explicitly.
+    /// @note This method may be called more than once.
+    //----------------------------------------------------------------------------------------
+    virtual void shutdown() {};
 
     //----------------------------------------------------------------------------------------
     /// Implement this method to render stuff on the screen.
@@ -79,11 +79,11 @@ public:
     //----------------------------------------------------------------------------------------
     void stop() noexcept;
 
-	//----------------------------------------------------------------------------------------
-	/// Called during playback to add the incoming audio blocks to the ring buffer.
-	/// @param[in] buffer					Incoming audio buffer.
-	//----------------------------------------------------------------------------------------
-	void processBlock(const AudioBuffer<float>& buffer);
+    //----------------------------------------------------------------------------------------
+    /// Called during playback to add the incoming audio blocks to the ring buffer.
+    /// @param[in] buffer					Incoming audio buffer.
+    //----------------------------------------------------------------------------------------
+    void processBlock(const AudioBuffer<float>& buffer);
 
     //----------------------------------------------------------------------------------------
     /// Returns the number of samples to read from the ring buffer before each render.
@@ -114,7 +114,7 @@ protected:
 
     RingBuffer<float> m_ringBuffer;		/// Ring buffer that holds the incoming audio data.
     AudioBuffer<float> m_readBuffer;	/// Temporary buffer to store the latest ring buffer's audio frame.
-	const double m_sampleRate = 0.0;    /// Sample rate.
+    const double m_sampleRate = 0.0;    /// Sample rate.
 
 private:
     //----------------------------------------------------------------------------------------

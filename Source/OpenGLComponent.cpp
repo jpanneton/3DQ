@@ -8,15 +8,15 @@
 
 OpenGLComponent::OpenGLComponent(int readSize, double sampleRate, bool continuousRepaint)
     : m_backgroundColor(getLookAndFeel().findColour(ResizableWindow::backgroundColourId))
-	, m_ringBuffer(2, readSize * 10)
-	, m_readBuffer(2, readSize)
+    , m_ringBuffer(2, readSize * 10)
+    , m_readBuffer(2, readSize)
     , m_sampleRate(sampleRate)
 {
-	m_openGLContext.setOpenGLVersionRequired(OpenGLContext::OpenGLVersion::openGL3_2);
-	m_openGLContext.setRenderer(this);
-	m_openGLContext.attachTo(*this);
+    m_openGLContext.setOpenGLVersionRequired(OpenGLContext::OpenGLVersion::openGL3_2);
+    m_openGLContext.setRenderer(this);
+    m_openGLContext.attachTo(*this);
     //openGLContext.setComponentPaintingEnabled(false);
-	m_openGLContext.setContinuousRepainting(continuousRepaint);
+    m_openGLContext.setContinuousRepainting(continuousRepaint);
 }
 
 OpenGLComponent::~OpenGLComponent()
@@ -31,19 +31,19 @@ OpenGLComponent::~OpenGLComponent()
 
 void OpenGLComponent::start() noexcept
 {
-	m_ringBuffer.clear();
-	m_openGLContext.setContinuousRepainting(true);
+    m_ringBuffer.clear();
+    m_openGLContext.setContinuousRepainting(true);
 }
 
 void OpenGLComponent::stop() noexcept
 {
-	m_openGLContext.setContinuousRepainting(false);
-	m_ringBuffer.clear();
+    m_openGLContext.setContinuousRepainting(false);
+    m_ringBuffer.clear();
 }
 
 void OpenGLComponent::processBlock(const AudioBuffer<float>& buffer)
 {
-	m_ringBuffer.writeSamples(buffer);
+    m_ringBuffer.writeSamples(buffer);
 }
 
 int OpenGLComponent::getReadSize() const noexcept
@@ -53,9 +53,9 @@ int OpenGLComponent::getReadSize() const noexcept
 
 void OpenGLComponent::shutdownOpenGL()
 {
-	m_openGLContext.setContinuousRepainting(false);
-	m_openGLContext.detach();
-	m_ringBuffer.clear();
+    m_openGLContext.setContinuousRepainting(false);
+    m_openGLContext.detach();
+    m_ringBuffer.clear();
 }
 
 void OpenGLComponent::newOpenGLContextCreated()
@@ -79,16 +79,16 @@ void OpenGLComponent::renderOpenGL()
     glEnable(GL_DEPTH_TEST);
 
     // Use shader program that's been defined
-	m_shader->use();
+    m_shader->use();
 
-	// Render component
+    // Render component
     render();
 }
 
 void OpenGLComponent::openGLContextClosing()
 {
     shutdown();
-	m_shader->release();
-	m_shader = nullptr;
-	m_uniforms = nullptr;
+    m_shader->release();
+    m_shader = nullptr;
+    m_uniforms = nullptr;
 }
