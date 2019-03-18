@@ -35,6 +35,12 @@ Spectrogram::Spectrogram(double sampleRate, int outputResolution)
     m_colorMap.setGradient(gradient);
 }
 
+Spectrogram::~Spectrogram()
+{
+    // Turn off OpenGL
+    shutdownOpenGL();
+}
+
 //==========================================================================
 // OpenGL Callbacks
 bool Spectrogram::updateData()
