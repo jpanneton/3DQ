@@ -7,6 +7,7 @@
 #pragma once
 
 #include "JuceHeader.h"
+#include "Math.h"
 
 //--------------------------------------------------------------------------------------------
 /// Generates orbital camera transformations from mouse input events and a set of parameters.
@@ -29,8 +30,8 @@ public:
     }
 
     //----------------------------------------------------------------------------------------
-    /// Constructor.
-    /// @param[in] orbitalRadius			Distance from the center point (point where the camera is pointing).
+    /// Sets the frame of the camera.
+    /// @param[in] newArea			        Viewport frame.
     //----------------------------------------------------------------------------------------
     void setViewport(Rectangle<int> newArea) noexcept
     {
@@ -39,7 +40,7 @@ public:
 
     //----------------------------------------------------------------------------------------
     /// Sets the rotation axis of the camera.
-    /// @param[in] orbitalRadius			Rotate axis.
+    /// @param[in] axis			            Rotation axis.
     //----------------------------------------------------------------------------------------
     void setOrbitalAxis(const VectorType& axis) noexcept
     {
@@ -74,6 +75,12 @@ public:
 
         m_pitch += (newMousePos.y - m_lastMousePos.y);
         m_yaw += (newMousePos.x - m_lastMousePos.x);
+
+        if (m_pitch > 0.0f)
+            m_pitch = 0.0f;
+        if (m_pitch < -pi<float> / 2.0f)
+            m_pitch = -pi<float> / 2.0f;
+
         QuaternionType pitchQuat = QuaternionType::fromAngle(m_pitch, VectorType::xAxis());
         QuaternionType yawQuat = QuaternionType::fromAngle(-m_yaw, VectorType::yAxis());
         yawQuat *= pitchQuat;
@@ -96,16 +103,17 @@ public:
 
 private:
     //----------------------------------------------------------------------------------------
-    /// Mouse drag event callback.
-    /// @param[in] mousePos					Current mouse position.
-    /// @return								View matrix.
+    /// Converts a screen position in pixels to a normalized position (between -1 and 1).
+    /// Allows dragging to be relative to the viewport size.
+    /// @param[in] mousePos					Mouse position in pixels.
+    /// @return								Normalized mouse position.
     //----------------------------------------------------------------------------------------
     Point<float> mousePosToProportion(const Point<float>& mousePos) const noexcept
     {
         // setViewport() must be called before any mouse input callbacks!
         jassert(m_area.getWidth() > 0 && m_area.getHeight() > 0);
 
-        float scale = jmin(m_area.getWidth(), m_area.getHeight()) / 2.0f;
+        const float scale = jmin(m_area.getWidth(), m_area.getHeight()) / 2.0f;
         return { (mousePos.x - m_area.getCentreX()) / scale,
             (m_area.getCentreY() - mousePos.y) / scale };
     }

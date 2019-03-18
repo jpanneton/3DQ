@@ -8,6 +8,8 @@
 
 #include "Utilities/Math.h"
 
+// https://bitbucket.org/Mayae/cpl
+
 template<typename T>
 inline T lanczosKernel(T x, int size)
 {

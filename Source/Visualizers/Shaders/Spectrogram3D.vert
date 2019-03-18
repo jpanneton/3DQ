@@ -16,6 +16,7 @@ void main()
 	vec4 texelValue = texture(imageTexture, uv.xy);
 	// Alpha channel is used for height
     gl_Position = projectionMatrix * viewMatrix * vec4(position.x, uv.z * texelValue.a, position.z, 1.0);
-    fragColor = texelValue.rgb;
+    // JUCE images are premultiplied by alpha
+    fragColor = (texelValue.a > 0 ? texelValue.rgb / texelValue.a : vec3(0, 0, 0));
 }
 )"

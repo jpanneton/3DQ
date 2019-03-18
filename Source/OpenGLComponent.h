@@ -98,8 +98,8 @@ protected:
     //----------------------------------------------------------------------------------------
     struct ShaderUniforms
     {
-    protected:
         using Uniform = OpenGLShaderProgram::Uniform;
+        virtual ~ShaderUniforms() = default;
     };
 
     //----------------------------------------------------------------------------------------

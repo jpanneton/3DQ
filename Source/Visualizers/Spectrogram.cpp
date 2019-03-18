@@ -35,12 +35,6 @@ Spectrogram::Spectrogram(double sampleRate, int outputResolution)
     m_colorMap.setGradient(gradient);
 }
 
-Spectrogram::~Spectrogram()
-{
-    // Turn off OpenGL
-    shutdownOpenGL();
-}
-
 //==========================================================================
 // OpenGL Callbacks
 bool Spectrogram::updateData()
@@ -132,7 +126,7 @@ void Spectrogram::interpolateData(const float* inputData, float* outputData, Int
     const int lanczosFilterSize = 5;
     const float nyquistFrequency = static_cast<float>(m_sampleRate) / 2;
     // Use frequency axis range instead of Nyquist frequency
-    const float freqToBin = fftBins / nyquistFrequency;
+    const float freqToBin = (fftBins - 1) / nyquistFrequency;
 
     /*for (size_t i = 0; i < fftBins; ++i)
     {
@@ -152,7 +146,7 @@ void Spectrogram::interpolateData(const float* inputData, float* outputData, Int
             if (freqBinWidth > fftBinWidth)
                 break;
             // + 0.5 to centerly space bins
-            size_t index = jlimit(size_t(0), size_t(fftBins), size_t(m_frequencyAxis[x] * freqToBin + 0.5));
+            size_t index = jlimit(size_t(0), size_t(fftBins - 1), size_t(m_frequencyAxis[x] * freqToBin + 0.5));
             outputData[x] = inputData[index];
         }
         break;
@@ -176,34 +170,28 @@ void Spectrogram::interpolateData(const float* inputData, float* outputData, Int
         break;
     }
 
-    int oldBin = static_cast<int>(m_frequencyAxis[x] * freqToBin);
-
     // 2- Filter out higher frequencies
+    int lastBin = static_cast<int>(m_frequencyAxis[x] * freqToBin);
     for (; x < m_frequencyAxis.getResolution(); ++x)
     {
-        int bin = static_cast<int>(m_frequencyAxis[x] * freqToBin);
-        int binDiff = bin - oldBin;
-        int binDiffCounter = binDiff ? 1 : 0;
+        const int currentBin = static_cast<int>(m_frequencyAxis[x] * freqToBin);
 
-        int maxLBin = bin;
-        float maxLMag{}, newLMag{};
+        int maxBin = currentBin;
+        float maxBinLevel = std::numeric_limits<float>::lowest();
 
-        // here we loop over all the bins that is mapped for a single coordinate
-        do
+        // Loop over all the bins that is mapped for a single coordinate
+        for (int nextBin = lastBin + 1; nextBin <= currentBin; ++nextBin)
         {
-            int binOffset = oldBin + binDiffCounter;
-            newLMag = inputData[binOffset];
-            // select highest number in this chunk for display. Not exactly correct, though.
-            if (newLMag > maxLMag)
+            const float nextBinLevel = inputData[nextBin];
+            // Select the one with the highest level for display
+            if (nextBinLevel > maxBinLevel)
             {
-                maxLBin = oldBin + binDiffCounter;
-                maxLMag = newLMag;
+                maxBin = nextBin;
+                maxBinLevel = nextBinLevel;
             }
-            ++binDiffCounter;
-            --binDiff;
-        } while (binDiff > 0);
+        }
 
-        outputData[x] = inputData[maxLBin];
-        oldBin = bin;
+        outputData[x] = inputData[maxBin];
+        lastBin = currentBin;
     }
 }
