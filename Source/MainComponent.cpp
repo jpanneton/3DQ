@@ -5,25 +5,32 @@
 //--------------------------------------------------------------------------------------------
 
 #include "MainComponent.h"
+#include "Utilities/ColorGradients.h"
 #include "Visualizers/Spectrogram2D.h"
 #include "Visualizers/Spectrogram3D.h"
+
+const juce::Colour MainComponent::BACKGROUND_COLOR(0, 0, 0);
+const juce::Colour MainComponent::SEPARATOR_COLOR(125, 125, 125);
 
 MainComponent::MainComponent()
 {
     // Setup GUI
-    addAndMakeVisible(&m_spectrogram2DButton);
-    m_spectrogram2DButton.setButtonText("Spectrogram 2D");
-    m_spectrogram2DButton.setColour(TextButton::buttonColourId, Colour(0xFF0C4B95));
-    m_spectrogram2DButton.addListener(this);
-    m_spectrogram2DButton.setToggleState(false, NotificationType::dontSendNotification);
+    addAndMakeVisible(m_controlPanel);
 
-    addAndMakeVisible(&m_spectrogram3DButton);
-    m_spectrogram3DButton.setButtonText("Spectrogram 3D");
-    m_spectrogram3DButton.setColour(TextButton::buttonColourId, Colour(0xFF0C4B95));
-    m_spectrogram3DButton.addListener(this);
-    m_spectrogram3DButton.setToggleState(false, NotificationType::dontSendNotification);
+    const auto addButton = [&](Button& button, const char* text, bool toggled)
+    {
+        m_controlPanel.addAndMakeVisible(button);
+        button.setButtonText(text);
+        button.setColour(TextButton::buttonColourId, Colour(0xFF0C4B95));
+        button.onClick = [&] { buttonClicked(&button); };
+        button.setToggleState(toggled, NotificationType::dontSendNotification);
+    };
 
-    m_background = ImageCache::getFromMemory(BinaryData::Background_png, BinaryData::Background_pngSize);
+    addButton(m_spectrogram2DButton, "Spectrogram 2D", false);
+    addButton(m_spectrogram3DButton, "Spectrogram 3D", false);
+    addButton(m_lowFrequencyButton, "Low Frequency Mode", false);
+    addButton(m_adaptiveLevelButton, "Adaptive Level", true);
+    addButton(m_clipLevelButton, "Clip Level", false);
 }
 
 MainComponent::~MainComponent()
@@ -67,36 +74,47 @@ void MainComponent::processBlock(AudioBuffer<float>& buffer)
 
 void MainComponent::paint(Graphics& g)
 {
-    g.fillAll(Colour(0xFF252831));
-    g.drawImageAt(m_background, 0, 0);
+    const int controlPanelY = static_cast<int>(VISUALIZER_RATIO * getHeight());
+    g.fillAll(BACKGROUND_COLOR);
+    g.setColour(SEPARATOR_COLOR);
+    g.drawHorizontalLine(controlPanelY + 1, 0.0f, static_cast<float>(getWidth()));
 }
 
 void MainComponent::resized()
 {
-    const int border = 3;
-    const int w = getWidth();
-    const int h = getHeight();
+    // Main component
+    const int width = getWidth();
+    const int height = getHeight();
+    const int controlPanelY = static_cast<int>(VISUALIZER_RATIO * height);
 
-    // Button Dimenstions
-    const int bWidth = (w - 30) / 2;
-    const int bHeight = 20;
-    const int bMargin = 10;
+    m_controlPanel.setBounds(0, controlPanelY, width, height - controlPanelY);
+    
+    // Controls
+    constexpr int panelPadding = 20;
 
-    m_spectrogram2DButton.setBounds(bWidth + 2 * bMargin, h - 80, bWidth, bHeight);
-    m_spectrogram3DButton.setBounds(bWidth + 2 * bMargin, h - 40, bWidth, bHeight);
+    // Buttons
+    const int buttonWidth = (width - 30) / 2;
+    constexpr int buttonHeight = 20;
+    constexpr int buttonMargin = 10;
 
-    if (m_spectrogram2D != nullptr)
-        m_spectrogram2D->setBounds(border, border, w - 2 * border, 509 - border);
-    if (m_spectrogram3D != nullptr)
-        m_spectrogram3D->setBounds(border, border, w - 2 * border, 509 - border);
+    m_spectrogram2DButton.setBounds(panelPadding, 25, buttonWidth, buttonHeight);
+    m_spectrogram3DButton.setBounds(panelPadding, 50, buttonWidth, buttonHeight);
+    m_lowFrequencyButton.setBounds(panelPadding, 75, buttonWidth, buttonHeight);
+    m_adaptiveLevelButton.setBounds(panelPadding, 100, buttonWidth, buttonHeight);
+    m_clipLevelButton.setBounds(panelPadding, 125, buttonWidth, buttonHeight);
+
+    if (m_spectrogram2D)
+        m_spectrogram2D->setBounds(0, 0, width, controlPanelY);
+    if (m_spectrogram3D)
+        m_spectrogram3D->setBounds(0, 0, width, controlPanelY);
 }
 
 void MainComponent::buttonClicked(Button* button)
 {
+    const bool buttonToggleState = button->getToggleState();
+
     if (button == &m_spectrogram2DButton)
     {
-        bool buttonToggleState = !button->getToggleState();
-        button->setToggleState(buttonToggleState, NotificationType::dontSendNotification);
         m_spectrogram3DButton.setToggleState(false, NotificationType::dontSendNotification);
 
         m_spectrogram3D->setVisible(false);
@@ -111,10 +129,8 @@ void MainComponent::buttonClicked(Button* button)
     }
     else if (button == &m_spectrogram3DButton)
     {
-        bool buttonToggleState = !button->getToggleState();
-        button->setToggleState(buttonToggleState, NotificationType::dontSendNotification);
         m_spectrogram2DButton.setToggleState(false, NotificationType::dontSendNotification);
-
+        
         m_spectrogram2D->setVisible(false);
         m_spectrogram3D->setVisible(buttonToggleState);
 
@@ -124,5 +140,21 @@ void MainComponent::buttonClicked(Button* button)
         m_activeVisualizer = m_spectrogram3D.get();
         m_activeVisualizer->start();
         resized();
+    }
+    else if (button == &m_lowFrequencyButton)
+    {
+        const ColourGradient gradient = !buttonToggleState ? ColorGradients::getDefaultGradient() : ColorGradients::getRedGradient();
+        m_spectrogram2D->setMaxFrequency(!buttonToggleState ? 44100.0f / 2.0f : 200.0f, gradient);
+        m_spectrogram3D->setMaxFrequency(!buttonToggleState ? 44100.0f / 2.0f : 200.0f, gradient);
+    }
+    else if (button == &m_adaptiveLevelButton)
+    {
+        m_spectrogram2D->setAdaptiveLevel(buttonToggleState);
+        m_spectrogram3D->setAdaptiveLevel(buttonToggleState);
+    }
+    else if (button == &m_clipLevelButton)
+    {
+        m_spectrogram2D->setClipLevel(buttonToggleState);
+        m_spectrogram3D->setClipLevel(buttonToggleState);
     }
 }

@@ -5,9 +5,7 @@
               defines="JUCE_OPENGL3 = 1; JUCE_OPENGL_ALLOW_NON_POWER_OF_TWO_TEXTURES = 1"
               headerPath="..\..\Source">
   <MAINGROUP id="RsPahE" name="3DQ">
-    <GROUP id="{7CC64696-3AE9-014B-61FC-DFE305843A03}" name="Resources">
-      <FILE id="vlytu9" name="Background.png" compile="0" resource="1" file="Resources/Background.png"/>
-    </GROUP>
+    <GROUP id="{7CC64696-3AE9-014B-61FC-DFE305843A03}" name="Resources"/>
     <GROUP id="{6B398900-1215-DC58-8B38-3EDA5E4D4335}" name="Source">
       <GROUP id="{EA8D9CAF-0943-66C4-B603-4B8FC4CEA390}" name="DSP">
         <FILE id="WEVKCG" name="Filters.h" compile="0" resource="0" file="Source/DSP/Filters.h"/>
@@ -17,6 +15,8 @@
               file="Source/Utilities/AbstractRingBuffer.cpp"/>
         <FILE id="tPN9BU" name="AbstractRingBuffer.h" compile="0" resource="0"
               file="Source/Utilities/AbstractRingBuffer.h"/>
+        <FILE id="rUUz8I" name="ColorGradients.h" compile="0" resource="0"
+              file="Source/Utilities/ColorGradients.h"/>
         <FILE id="IjjEpy" name="ColorMap.h" compile="0" resource="0" file="Source/Utilities/ColorMap.h"/>
         <FILE id="KKWJBk" name="DraggableOrbitCamera.h" compile="0" resource="0"
               file="Source/Utilities/DraggableOrbitCamera.h"/>

@@ -66,6 +66,16 @@ public:
         }
     }
 
+    template<typename SizeType>
+    void setMaxFrequency(SizeType frequency)
+    {
+        if (frequency > m_frequencyRange.getMin() + 10)
+        {
+            m_frequencyRange.setMinMax(m_frequencyRange.getMin(), frequency);
+            remapFrequencies();
+        }
+    }
+
     //----------------------------------------------------------------------------------------
     /// Returns the current resolution (or size) of the axis.
     /// @return								Number of frequencies contained in the axis.

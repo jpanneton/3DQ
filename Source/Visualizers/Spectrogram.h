@@ -29,6 +29,25 @@ public:
     //----------------------------------------------------------------------------------------
     virtual ~Spectrogram();
 
+    //----------------------------------------------------------------------------------------
+    /// Set the maximum frequency of the spectrogram to better visualize the according range.
+    /// @param[in] frequency                Maximum frequency.
+    /// @param[in] gradient                 Color gradient to use as a colormap.
+    //----------------------------------------------------------------------------------------
+    void setMaxFrequency(float frequency, const ColourGradient& gradient);
+
+    //----------------------------------------------------------------------------------------
+    /// Set the adaptive level mode on or off.
+    /// @param[in] enabled                  If true, the level is normalized using min et max levels. If false, the original level is used for visualization.
+    //----------------------------------------------------------------------------------------
+    void setAdaptiveLevel(bool enabled);
+
+    //----------------------------------------------------------------------------------------
+    /// Set the clip level mode on or off.
+    /// @param[in] enabled                  If true, the level is clipped to 0 dB. If false, the level is clipped to an arbitrary positive dB value.
+    //----------------------------------------------------------------------------------------
+    void setClipLevel(bool enabled);
+
 protected:
     struct FrequencyInfo
     {
@@ -121,8 +140,9 @@ private:
     AudioBuffer<float> m_averager;			/// Averaged FFT output (used for smoother frequency resolution).
     int m_averagerPtr = 1;					/// Index used to keep track of the oldest averager slot.
 
-    const bool m_adaptativeLevel = true;	/// If true, the level is normalized using min et max levels. If false, the original level is used for visualization.
-    float m_maxFFTLevel = {};				/// Maximum level of the latest FFT frame.
+    Range<float> m_fftLevelRange;		    /// Minimum and maximum levels of the latest FFT frame.
+    bool m_adaptativeLevel = true;	        /// If true, the level is normalized using min et max levels. If false, the original level is used for visualization.
+    bool m_clipLevel = false;               /// If true, the level is clipped to 0 dB. If false, the level is clipped to an arbitrary positive dB value.
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Spectrogram)
 };

@@ -11,8 +11,7 @@ PluginEditor::PluginEditor(PluginProcessor& processor)
     : AudioProcessorEditor(&processor)
     , m_processor(processor)
 {
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
+    // Size needs to be set before construction!
     setSize(700, 700);
     addAndMakeVisible(m_processor.m_visualizer);
 }
@@ -23,13 +22,11 @@ PluginEditor::~PluginEditor()
 
 void PluginEditor::paint(Graphics& g)
 {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId));
+    g.fillAll(Colours::black);
 }
 
 void PluginEditor::resized()
 {
-    // This is generally where you'll want to lay out the positions of any
-    // subcomponents in your editor..
-    m_processor.m_visualizer.setBounds(getLocalBounds());
+    constexpr int padding = 3;
+    m_processor.m_visualizer.setBounds(getLocalBounds().reduced(padding));
 }

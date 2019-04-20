@@ -10,7 +10,7 @@
 #include "Utilities/RingBuffer.h"
 #include <memory>
 
-class OpenGLComponent;
+class Spectrogram;
 class Spectrogram2D;
 class Spectrogram3D;
 
@@ -18,7 +18,7 @@ class Spectrogram3D;
 /// Main component of the editor. Contains all the UI related stuff.
 /// Based on https://github.com/TimArt/3DAudioVisualizers.
 //--------------------------------------------------------------------------------------------
-class MainComponent : public Component, public Button::Listener
+class MainComponent : public Component
 {
 public:
     //----------------------------------------------------------------------------------------
@@ -68,14 +68,19 @@ public:
     /// Called when a button is clicked.
     /// @param[in] button					Button being clicked.
     //----------------------------------------------------------------------------------------
-    void buttonClicked(Button* button) override;
+    void buttonClicked(Button* button);
 
 private:
-    Image m_background;
+    const float VISUALIZER_RATIO = 0.75f;
+
+    Component m_controlPanel;
 
     // GUI buttons
-    TextButton m_spectrogram2DButton;
-    TextButton m_spectrogram3DButton;
+    ToggleButton m_spectrogram2DButton;
+    ToggleButton m_spectrogram3DButton;
+    ToggleButton m_lowFrequencyButton;
+    ToggleButton m_adaptiveLevelButton;
+    ToggleButton m_clipLevelButton;
 
     // Audio buffer
     std::unique_ptr<RingBuffer<float>> m_ringBuffer;
@@ -84,7 +89,11 @@ private:
     std::unique_ptr<Spectrogram2D> m_spectrogram2D;
     std::unique_ptr<Spectrogram3D> m_spectrogram3D;
 
-    OpenGLComponent* m_activeVisualizer = nullptr;
+    Spectrogram* m_activeVisualizer = nullptr;
+
+    // Colors
+    static const juce::Colour BACKGROUND_COLOR;
+    static const juce::Colour SEPARATOR_COLOR;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };

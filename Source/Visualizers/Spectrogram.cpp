@@ -6,6 +6,7 @@
 
 #include "Spectrogram.h"
 #include "DSP/Filters.h"
+#include "Utilities/ColorGradients.h"
 #include <numeric>
 
 Spectrogram::Spectrogram(double sampleRate, int outputResolution)
@@ -26,19 +27,29 @@ Spectrogram::Spectrogram(double sampleRate, int outputResolution)
     m_statusLabel.setFont(Font(14.0f));
 
     // Default colormap
-    ColourGradient gradient;
-    gradient.addColour(0.0, Colours::white);
-    gradient.addColour(0.25, Colours::yellow);
-    gradient.addColour(0.50, Colours::red);
-    gradient.addColour(0.75, Colours::blue);
-    gradient.addColour(1.0, Colours::black);
-    m_colorMap.setGradient(gradient);
+    m_colorMap.setGradient(ColorGradients::getDefaultGradient());
 }
 
 Spectrogram::~Spectrogram()
 {
     // Turn off OpenGL
     shutdownOpenGL();
+}
+
+void Spectrogram::setMaxFrequency(float frequency, const ColourGradient& gradient)
+{
+    m_colorMap.setGradient(gradient);
+    m_frequencyAxis.setMaxFrequency(frequency);
+}
+
+void Spectrogram::setAdaptiveLevel(bool enabled)
+{
+    m_adaptativeLevel = enabled;
+}
+
+void Spectrogram::setClipLevel(bool enabled)
+{
+    m_clipLevel = enabled;
 }
 
 //==========================================================================
@@ -76,9 +87,9 @@ bool Spectrogram::updateData()
             m_averagerPtr = 1;
 
         const float* averagedData = m_averager.getReadPointer(0);
-
+        
         // Find the range of values produced, so we can scale our rendering to show up the detail clearly
-        m_maxFFTLevel = m_adaptativeLevel ? FloatVectorOperations::findMinAndMax(averagedData, fftBins).getEnd() : Decibels::decibelsToGain<float>(-12);
+        m_fftLevelRange = FloatVectorOperations::findMinAndMax(averagedData, fftBins);
 
         // Interpolate the latest averaged result
         interpolateData(averagedData, m_visuData, InterpolationMode::Lanczos);
@@ -94,12 +105,19 @@ Spectrogram::FrequencyInfo Spectrogram::getFrequencyInfo(int index) const
     const float sample = m_visuData[index];
     float level = 0.0f;
 
-    if (m_maxFFTLevel != 0.0f)
+    if (m_fftLevelRange.getEnd() != 0.0f)
     {
-        level = 10 * log10(abs(sample) * abs(sample));
-        level = Decibels::gainToDecibels(sample);
-        level = jmap(level, -90.0f, 10.0f, 0.0f, 1.0f);
-        //level = jmap(sample, 0.0f, maxFFTLevel, 0.0f, 1.0f);
+        const float mindB = m_adaptativeLevel ? Decibels::gainToDecibels(m_fftLevelRange.getStart()) : -90.0f; // -100
+        const float maxdB = m_adaptativeLevel ? Decibels::gainToDecibels(m_fftLevelRange.getEnd()) : 10.0f;
+        if (mindB < maxdB)
+        {
+            level = Decibels::gainToDecibels(sample);
+            if (!m_adaptativeLevel && m_clipLevel && level > 0.0f)
+            {
+                level = 0.0f;
+            }
+            level = jmap(jlimit(mindB, maxdB, level), mindB, maxdB, 0.0f, 1.0f);
+        }
     }
 
     return { frequency, level };
