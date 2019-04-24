@@ -10,6 +10,17 @@
       <GROUP id="{EA8D9CAF-0943-66C4-B603-4B8FC4CEA390}" name="DSP">
         <FILE id="WEVKCG" name="Filters.h" compile="0" resource="0" file="Source/DSP/Filters.h"/>
       </GROUP>
+      <GROUP id="{D666C482-9062-B29F-4951-A0F04F7BF54C}" name="GUI">
+        <FILE id="Ffo1mp" name="MainComponent.cpp" compile="1" resource="0"
+              file="Source/GUI/MainComponent.cpp"/>
+        <FILE id="HFMBQj" name="MainComponent.h" compile="0" resource="0" file="Source/GUI/MainComponent.h"/>
+        <FILE id="A4ZZV0" name="OpenGLComponent.cpp" compile="1" resource="0"
+              file="Source/GUI/OpenGLComponent.cpp"/>
+        <FILE id="hJDlT5" name="OpenGLComponent.h" compile="0" resource="0"
+              file="Source/GUI/OpenGLComponent.h"/>
+        <FILE id="vL9LrT" name="StatusBar.cpp" compile="1" resource="0" file="Source/GUI/StatusBar.cpp"/>
+        <FILE id="NkXDQT" name="StatusBar.h" compile="0" resource="0" file="Source/GUI/StatusBar.h"/>
+      </GROUP>
       <GROUP id="{C3FAF0C4-8293-323C-1137-E9D66AEB1659}" name="Utilities">
         <FILE id="aGsBe6" name="AbstractRingBuffer.cpp" compile="1" resource="0"
               file="Source/Utilities/AbstractRingBuffer.cpp"/>
@@ -37,13 +48,6 @@
               file="Source/Visualizers/Spectrogram3D.cpp"/>
         <FILE id="SrhH9u" name="Spectrogram3D.h" compile="0" resource="0" file="Source/Visualizers/Spectrogram3D.h"/>
       </GROUP>
-      <FILE id="IEFVPL" name="MainComponent.cpp" compile="1" resource="0"
-            file="Source/MainComponent.cpp"/>
-      <FILE id="a24LBl" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
-      <FILE id="srZwtv" name="OpenGLComponent.cpp" compile="1" resource="0"
-            file="Source/OpenGLComponent.cpp"/>
-      <FILE id="mkh1PY" name="OpenGLComponent.h" compile="0" resource="0"
-            file="Source/OpenGLComponent.h"/>
       <FILE id="i6SQGU" name="PluginEditor.cpp" compile="1" resource="0"
             file="Source/PluginEditor.cpp"/>
       <FILE id="Egpxk7" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
@@ -51,8 +55,6 @@
             file="Source/PluginProcessor.cpp"/>
       <FILE id="AJnZj8" name="PluginProcessor.h" compile="0" resource="0"
             file="Source/PluginProcessor.h"/>
-      <FILE id="f8nRb9" name="StatusBar.cpp" compile="1" resource="0" file="Source/StatusBar.cpp"/>
-      <FILE id="Dd7wAH" name="StatusBar.h" compile="0" resource="0" file="Source/StatusBar.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>

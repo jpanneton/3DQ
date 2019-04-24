@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "OpenGLComponent.h"
+#include "GUI/OpenGLComponent.h"
 #include "Utilities/ColorMap.h"
 #include "Utilities/FrequencyAxis.h"
 
@@ -140,7 +140,7 @@ private:
     int m_averagerPtr = 1;					/// Index used to keep track of the oldest averager slot.
 
     Range<float> m_fftLevelRange;		    /// Minimum and maximum levels of the latest FFT frame.
-    bool m_adaptativeLevel = true;	        /// If true, the level is normalized using min et max levels. If false, the original level is used for visualization.
+    bool m_adaptativeLevel = false;	        /// If true, the level is normalized using min et max levels. If false, the original level is used for visualization.
     bool m_clipLevel = false;               /// If true, the level is clipped to 0 dB. If false, the level is clipped to an arbitrary positive dB value.
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Spectrogram)

@@ -5,9 +5,8 @@
 //--------------------------------------------------------------------------------------------
 
 #include "Spectrogram2D.h"
-#include "StatusBar.h"
 #include "DSP/Filters.h"
-#include <numeric>
+#include "GUI/StatusBar.h"
 
 Spectrogram2D::Spectrogram2D(double sampleRate, StatusBar& statusBar)
     : Spectrogram(sampleRate, 512, statusBar)

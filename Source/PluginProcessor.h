@@ -6,8 +6,7 @@
 
 #pragma once
 
-#include "JuceHeader.h"
-#include "MainComponent.h"
+#include "GUI/MainComponent.h"
 
 //--------------------------------------------------------------------------------------------
 /// Audio thread of the plugin.

@@ -5,9 +5,8 @@
 //--------------------------------------------------------------------------------------------
 
 #include "Spectrogram3D.h"
-#include "StatusBar.h"
 #include "DSP/Filters.h"
-#include <numeric>
+#include "GUI/StatusBar.h"
 
 Spectrogram3D::Spectrogram3D(double sampleRate, StatusBar& statusBar)
     : Spectrogram(sampleRate, 256, statusBar)

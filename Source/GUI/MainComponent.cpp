@@ -30,7 +30,7 @@ MainComponent::MainComponent()
     addButton(m_spectrogram2DButton, "Spectrogram 2D", false);
     addButton(m_spectrogram3DButton, "Spectrogram 3D", false);
     addButton(m_lowFrequencyButton, "Low Frequency Mode", false);
-    addButton(m_adaptiveLevelButton, "Adaptive Level", true);
+    addButton(m_adaptiveLevelButton, "Adaptive Level", false);
     addButton(m_clipLevelButton, "Clip Level", false);
 }
 
