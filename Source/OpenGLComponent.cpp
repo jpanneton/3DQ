@@ -12,11 +12,13 @@ OpenGLComponent::OpenGLComponent(int readSize, double sampleRate, bool continuou
     , m_readBuffer(2, readSize)
     , m_sampleRate(sampleRate)
 {
+    m_readBuffer.clear();
+
     m_openGLContext.setOpenGLVersionRequired(OpenGLContext::OpenGLVersion::openGL3_2);
+    m_openGLContext.setComponentPaintingEnabled(false);
+    m_openGLContext.setContinuousRepainting(continuousRepaint);
     m_openGLContext.setRenderer(this);
     m_openGLContext.attachTo(*this);
-    //openGLContext.setComponentPaintingEnabled(false);
-    m_openGLContext.setContinuousRepainting(continuousRepaint);
 }
 
 OpenGLComponent::~OpenGLComponent()
@@ -83,6 +85,19 @@ void OpenGLComponent::renderOpenGL()
 
     // Render component
     render();
+
+    // Update statistics
+    const double currentTimePoint = Time::getMillisecondCounterHiRes();
+    m_ellapsedTime += (currentTimePoint - m_lastTimePoint);
+    m_lastTimePoint = currentTimePoint;
+    ++m_fpsCounter;
+
+    if (m_ellapsedTime >= 1000.0) // 1 second
+    {
+        m_ellapsedTime = 0.0;
+        m_fps = m_fpsCounter;
+        m_fpsCounter = 0;
+    }
 }
 
 void OpenGLComponent::openGLContextClosing()

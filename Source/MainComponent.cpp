@@ -9,12 +9,13 @@
 #include "Visualizers/Spectrogram2D.h"
 #include "Visualizers/Spectrogram3D.h"
 
-const juce::Colour MainComponent::BACKGROUND_COLOR(0, 0, 0);
-const juce::Colour MainComponent::SEPARATOR_COLOR(125, 125, 125);
+const Colour MainComponent::BACKGROUND_COLOR(0, 0, 0);
+const Colour MainComponent::SEPARATOR_COLOR(125, 125, 125);
 
 MainComponent::MainComponent()
 {
     // Setup GUI
+    addAndMakeVisible(m_statusBar);
     addAndMakeVisible(m_controlPanel);
 
     const auto addButton = [&](Button& button, const char* text, bool toggled)
@@ -40,10 +41,10 @@ MainComponent::~MainComponent()
 void MainComponent::prepareToPlay(double sampleRate)
 {
     // Create visualizers
-    m_spectrogram2D = std::make_unique<Spectrogram2D>(sampleRate);
+    m_spectrogram2D = std::make_unique<Spectrogram2D>(sampleRate, m_statusBar);
     addChildComponent(m_spectrogram2D.get());
 
-    m_spectrogram3D = std::make_unique<Spectrogram3D>(sampleRate);
+    m_spectrogram3D = std::make_unique<Spectrogram3D>(sampleRate, m_statusBar);
     addChildComponent(m_spectrogram3D.get());
 }
 
@@ -74,10 +75,10 @@ void MainComponent::processBlock(AudioBuffer<float>& buffer)
 
 void MainComponent::paint(Graphics& g)
 {
-    const int controlPanelY = static_cast<int>(VISUALIZER_RATIO * getHeight());
     g.fillAll(BACKGROUND_COLOR);
     g.setColour(SEPARATOR_COLOR);
-    g.drawHorizontalLine(controlPanelY + 1, 0.0f, static_cast<float>(getWidth()));
+    g.drawHorizontalLine(m_statusBar.getY() + 1, 0.0f, static_cast<float>(getWidth()));
+    g.drawHorizontalLine(m_controlPanel.getY() + 1, 0.0f, static_cast<float>(getWidth()));
 }
 
 void MainComponent::resized()
@@ -85,8 +86,10 @@ void MainComponent::resized()
     // Main component
     const int width = getWidth();
     const int height = getHeight();
-    const int controlPanelY = static_cast<int>(VISUALIZER_RATIO * height);
+    const int statusBarY = static_cast<int>(VISUALIZER_RATIO * height);
+    const int controlPanelY = statusBarY + CONTROL_HEIGHT;
 
+    m_statusBar.setBounds(0, statusBarY, width, CONTROL_HEIGHT);
     m_controlPanel.setBounds(0, controlPanelY, width, height - controlPanelY);
     
     // Controls
@@ -97,16 +100,16 @@ void MainComponent::resized()
     constexpr int buttonHeight = 20;
     constexpr int buttonMargin = 10;
 
-    m_spectrogram2DButton.setBounds(panelPadding, 25, buttonWidth, buttonHeight);
-    m_spectrogram3DButton.setBounds(panelPadding, 50, buttonWidth, buttonHeight);
-    m_lowFrequencyButton.setBounds(panelPadding, 75, buttonWidth, buttonHeight);
-    m_adaptiveLevelButton.setBounds(panelPadding, 100, buttonWidth, buttonHeight);
-    m_clipLevelButton.setBounds(panelPadding, 125, buttonWidth, buttonHeight);
+    m_spectrogram2DButton.setBounds(panelPadding, CONTROL_HEIGHT, buttonWidth, buttonHeight);
+    m_spectrogram3DButton.setBounds(panelPadding, CONTROL_HEIGHT * 2, buttonWidth, buttonHeight);
+    m_lowFrequencyButton.setBounds(panelPadding, CONTROL_HEIGHT * 3, buttonWidth, buttonHeight);
+    m_adaptiveLevelButton.setBounds(panelPadding, CONTROL_HEIGHT * 4, buttonWidth, buttonHeight);
+    m_clipLevelButton.setBounds(panelPadding, CONTROL_HEIGHT * 5, buttonWidth, buttonHeight);
 
     if (m_spectrogram2D)
-        m_spectrogram2D->setBounds(0, 0, width, controlPanelY);
+        m_spectrogram2D->setBounds(0, 0, width, statusBarY);
     if (m_spectrogram3D)
-        m_spectrogram3D->setBounds(0, 0, width, controlPanelY);
+        m_spectrogram3D->setBounds(0, 0, width, statusBarY);
 }
 
 void MainComponent::buttonClicked(Button* button)

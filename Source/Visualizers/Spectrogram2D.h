@@ -17,9 +17,10 @@ class Spectrogram2D : public Spectrogram
 public:
     //----------------------------------------------------------------------------------------
     /// Constructor.
-    /// @param sampleRate                   Sample rate.
+    /// @param[in] sampleRate               Sample rate.
+    /// @param[out] statusBar               Reference to the status bar (GUI).
     //----------------------------------------------------------------------------------------
-    Spectrogram2D(double sampleRate);
+    Spectrogram2D(double sampleRate, StatusBar& statusBar);
 
     //----------------------------------------------------------------------------------------
     /// Destructor.

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "JuceHeader.h"
+#include "StatusBar.h"
 #include "Utilities/RingBuffer.h"
 #include <memory>
 
@@ -71,11 +72,13 @@ public:
     void buttonClicked(Button* button);
 
 private:
-    const float VISUALIZER_RATIO = 0.75f;
+    static constexpr float VISUALIZER_RATIO = 0.725f;
+    static constexpr int CONTROL_HEIGHT = 25;
 
+    StatusBar m_statusBar;
     Component m_controlPanel;
 
-    // GUI buttons
+    // Controls
     ToggleButton m_spectrogram2DButton;
     ToggleButton m_spectrogram3DButton;
     ToggleButton m_lowFrequencyButton;
@@ -92,8 +95,8 @@ private:
     Spectrogram* m_activeVisualizer = nullptr;
 
     // Colors
-    static const juce::Colour BACKGROUND_COLOR;
-    static const juce::Colour SEPARATOR_COLOR;
+    static const Colour BACKGROUND_COLOR;
+    static const Colour SEPARATOR_COLOR;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };

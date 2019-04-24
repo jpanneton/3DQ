@@ -51,6 +51,8 @@
             file="Source/PluginProcessor.cpp"/>
       <FILE id="AJnZj8" name="PluginProcessor.h" compile="0" resource="0"
             file="Source/PluginProcessor.h"/>
+      <FILE id="f8nRb9" name="StatusBar.cpp" compile="1" resource="0" file="Source/StatusBar.cpp"/>
+      <FILE id="Dd7wAH" name="StatusBar.h" compile="0" resource="0" file="Source/StatusBar.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>

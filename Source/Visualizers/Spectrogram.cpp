@@ -9,8 +9,9 @@
 #include "Utilities/ColorGradients.h"
 #include <numeric>
 
-Spectrogram::Spectrogram(double sampleRate, int outputResolution)
+Spectrogram::Spectrogram(double sampleRate, int outputResolution, StatusBar& statusBar)
     : OpenGLComponent(fftSize, sampleRate, false)
+    , m_statusBar(statusBar)
     , m_frequencyAxis(outputResolution, 20.0f, static_cast<float>(sampleRate) / 2) // Nyquist frequency
     , m_colorMap(64)
     , m_forwardFFT(fftOrder)
@@ -20,11 +21,6 @@ Spectrogram::Spectrogram(double sampleRate, int outputResolution)
     , m_averager(5, fftBins)
 {
     m_averager.clear();
-
-    // Setup GUI Overlay Label: Status of Shaders, compiler errors, etc.
-    addAndMakeVisible(m_statusLabel);
-    m_statusLabel.setJustificationType(Justification::topLeft);
-    m_statusLabel.setFont(Font(14.0f));
 
     // Default colormap
     m_colorMap.setGradient(ColorGradients::getDefaultGradient());
@@ -58,51 +54,50 @@ bool Spectrogram::updateData()
 {
     // Copy data from ring buffer into FFT
     m_ringBuffer.readSamples(m_readBuffer, 0.5);
+    
+    // Zero Out FFT for next use
+    zeromem(m_fftData, sizeof(GLfloat) * 2 * fftSize);
+    FloatVectorOperations::clear(m_fftData, getReadSize());
+
+    /** Future Feature:
+        Instead of summing channels below, keep the channels separate and
+        lay out the spectrum so you can see the left and right channels
+        individually on either half of the spectrum.
+     */
+     // Sum channels together
+     // Should be average
+    for (int i = 0; i < 2; ++i)
     {
-        // Zero Out FFT for next use
-        zeromem(m_fftData, sizeof(GLfloat) * 2 * fftSize);
-        FloatVectorOperations::clear(m_fftData, getReadSize());
-
-        /** Future Feature:
-            Instead of summing channels below, keep the channels separate and
-            lay out the spectrum so you can see the left and right channels
-            individually on either half of the spectrum.
-         */
-        // Sum channels together
-        // Should be average
-        for (int i = 0; i < 2; ++i)
-        {
-            FloatVectorOperations::add(m_fftData, m_readBuffer.getReadPointer(i), getReadSize());
-        }
-
-        // Apply window to avoid any spectral leakage
-        m_window.multiplyWithWindowingTable(m_fftData, fftSize);
-        // Perform FFT
-        m_forwardFFT.performFrequencyOnlyForwardTransform(m_fftData);
-        // Average FFT output to smooth frequency resolution
-        m_averager.addFrom(0, 0, m_averager.getReadPointer(m_averagerPtr), m_averager.getNumSamples(), -1.0f);
-        m_averager.copyFrom(m_averagerPtr, 0, m_fftData, m_averager.getNumSamples(), 1.0f / (m_averager.getNumSamples() * (m_averager.getNumChannels() - 1)));
-        m_averager.addFrom(0, 0, m_averager.getReadPointer(m_averagerPtr), m_averager.getNumSamples());
-        if (++m_averagerPtr == m_averager.getNumChannels())
-            m_averagerPtr = 1;
-
-        const float* averagedData = m_averager.getReadPointer(0);
-        
-        // Find the range of values produced, so we can scale our rendering to show up the detail clearly
-        m_fftLevelRange = FloatVectorOperations::findMinAndMax(averagedData, fftBins);
-
-        // Interpolate the latest averaged result
-        interpolateData(averagedData, m_visuData, InterpolationMode::Lanczos);
+        FloatVectorOperations::add(m_fftData, m_readBuffer.getReadPointer(i), getReadSize());
     }
+
+    // Apply window to avoid any spectral leakage
+    m_window.multiplyWithWindowingTable(m_fftData, fftSize);
+    // Perform FFT
+    m_forwardFFT.performFrequencyOnlyForwardTransform(m_fftData);
+    // Average FFT output to smooth frequency resolution (Welch's method)
+    m_averager.addFrom(0, 0, m_averager.getReadPointer(m_averagerPtr), m_averager.getNumSamples(), -1.0f);
+    m_averager.copyFrom(m_averagerPtr, 0, m_fftData, m_averager.getNumSamples(), 1.0f / (m_averager.getNumSamples() * (m_averager.getNumChannels() - 1)));
+    m_averager.addFrom(0, 0, m_averager.getReadPointer(m_averagerPtr), m_averager.getNumSamples());
+    if (++m_averagerPtr == m_averager.getNumChannels())
+        m_averagerPtr = 1;
+    
+    const float* averagedData = m_averager.getReadPointer(0);
+
+    // Find the range of values produced, so we can scale our rendering to show up the detail clearly
+    m_fftLevelRange = FloatVectorOperations::findMinAndMax(averagedData, fftBins);
+
+    // Interpolate the latest averaged result
+    interpolateData(averagedData, m_visuData, InterpolationMode::Lanczos);
 
     return true;
 }
 
 Spectrogram::FrequencyInfo Spectrogram::getFrequencyInfo(int index) const
 {
-    const auto j = m_frequencyAxis.getResolution() - index - 1;
-    const float frequency = m_frequencyAxis[j];
+    const float frequency = m_frequencyAxis[index];
     const float sample = m_visuData[index];
+    float leveldB = 0.0f;
     float level = 0.0f;
 
     if (m_fftLevelRange.getEnd() != 0.0f)
@@ -111,21 +106,16 @@ Spectrogram::FrequencyInfo Spectrogram::getFrequencyInfo(int index) const
         const float maxdB = m_adaptativeLevel ? Decibels::gainToDecibels(m_fftLevelRange.getEnd()) : 10.0f;
         if (mindB < maxdB)
         {
-            level = Decibels::gainToDecibels(sample);
+            leveldB = Decibels::gainToDecibels(sample);
             if (!m_adaptativeLevel && m_clipLevel && level > 0.0f)
             {
-                level = 0.0f;
+                leveldB = 0.0f;
             }
-            level = jmap(jlimit(mindB, maxdB, level), mindB, maxdB, 0.0f, 1.0f);
+            level = jmap(jlimit(mindB, maxdB, leveldB), mindB, maxdB, 0.0f, 1.0f);
         }
     }
 
-    return { frequency, level };
-}
-
-void Spectrogram::resized()
-{
-    m_statusLabel.setBounds(getLocalBounds().reduced(4).removeFromTop(75));
+    return { frequency, leveldB, level };
 }
 
 void Spectrogram::mouseEnter(const MouseEvent&)
@@ -136,6 +126,7 @@ void Spectrogram::mouseEnter(const MouseEvent&)
 void Spectrogram::mouseMove(const MouseEvent& event)
 {
     m_mousePosition = event.getPosition();
+    m_mousePosition.y = getHeight() - m_mousePosition.y - 1;
 }
 
 void Spectrogram::mouseExit(const MouseEvent&)

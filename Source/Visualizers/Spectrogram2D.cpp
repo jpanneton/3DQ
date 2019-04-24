@@ -5,11 +5,12 @@
 //--------------------------------------------------------------------------------------------
 
 #include "Spectrogram2D.h"
+#include "StatusBar.h"
 #include "DSP/Filters.h"
 #include <numeric>
 
-Spectrogram2D::Spectrogram2D(double sampleRate)
-    : Spectrogram(sampleRate, 512)
+Spectrogram2D::Spectrogram2D(double sampleRate, StatusBar& statusBar)
+    : Spectrogram(sampleRate, 512, statusBar)
     , m_spectrogramImage(Image::RGB, m_frequencyAxis.getResolution(), m_frequencyAxis.getResolution(), false)
 {
     m_backgroundColor = Colour::fromRGB(25, 25, 25);
@@ -69,8 +70,7 @@ void Spectrogram2D::createShaders()
         ;
 
     auto newShader = std::make_unique<OpenGLShaderProgram>(m_openGLContext);
-    String statusText;
-
+    
     if (newShader->addVertexShader(vertexShader) &&
         newShader->addFragmentShader(fragmentShader) &&
         newShader->link())
@@ -78,15 +78,11 @@ void Spectrogram2D::createShaders()
         m_shader = std::move(newShader);
         m_shader->use();
         m_uniforms = std::make_unique<Uniforms>(*m_shader);
-
-        statusText = "GLSL: v" + String(OpenGLShaderProgram::getLanguageVersion(), 2);
     }
     else
     {
-        statusText = newShader->getLastError();
+        jassertfalse;
     }
-
-    //statusLabel.setText(statusText, dontSendNotification);
 }
 
 void Spectrogram2D::render()
@@ -99,17 +95,21 @@ void Spectrogram2D::render()
     // Calculate new y values and shift old y values back
     for (int y = 0; y < m_frequencyAxis.getResolution(); ++y)
     {
-        const auto frequencyInfo = getFrequencyInfo(y);
-
-        if (m_isMouseHover && m_mousePosition.y == y)
-        {
-            const MessageManagerLock mmLock;
-            m_statusLabel.setText(std::to_string(frequencyInfo.frequency), dontSendNotification);
-        }
-
         const int j = m_frequencyAxis.getResolution() - y - 1;
-        const auto pixelColor = m_colorMap.getColorAtPosition(1.0f - frequencyInfo.level);
+        const auto frequencyInfo = getFrequencyInfo(y);
+        const auto pixelColor = m_colorMap.getColorAtPosition(frequencyInfo.normalizedLevel);
         m_spectrogramImage.setPixelAt(rightHandEdge, j, Colour::fromFloatRGBA(pixelColor.x, pixelColor.y, pixelColor.z, 1.0f));
+    }
+
+    if (m_isMouseHover)
+    {
+        jassert(m_mousePosition.y < m_frequencyAxis.getResolution());
+        const auto hoveredFrequencyInfo = getFrequencyInfo(m_mousePosition.y);
+        m_statusBar.update(m_fps, hoveredFrequencyInfo.frequency, hoveredFrequencyInfo.dbLevel);
+    }
+    else
+    {
+        m_statusBar.update(m_fps, 0.0f, 0.0f);
     }
     
     const Rectangle<int> bounds = m_spectrogramImage.getBounds();

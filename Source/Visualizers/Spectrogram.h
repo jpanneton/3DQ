@@ -10,9 +10,11 @@
 #include "Utilities/ColorMap.h"
 #include "Utilities/FrequencyAxis.h"
 
+class StatusBar;
+
 //--------------------------------------------------------------------------------------------
 /// Base spectrogram interface. Contains all the data and processing needed for visualization.
-/// Visualization and rendering must be performed in derived class.
+/// Visualization and rendering must be performed in a derived class.
 //--------------------------------------------------------------------------------------------
 class Spectrogram : public OpenGLComponent
 {
@@ -21,8 +23,9 @@ public:
     /// Constructor.
     /// @param[in] sampleRate               Sample rate.
     /// @param[in] outputResolution         Frequency output resolution.
+    /// @param[out] statusBar               Reference to the status bar (GUI).
     //----------------------------------------------------------------------------------------
-    Spectrogram(double sampleRate, int outputResolution);
+    Spectrogram(double sampleRate, int outputResolution, StatusBar& statusBar);
 
     //----------------------------------------------------------------------------------------
     /// Destructor.
@@ -51,8 +54,9 @@ public:
 protected:
     struct FrequencyInfo
     {
-        float frequency = {};
-        float level = {};
+        float frequency = {};           /// Frequency.
+        float dbLevel = {};             /// Level in dB.
+        float normalizedLevel = {};     /// Normalized level (between 0 and 1). Should be used for display.
     };
 
     //----------------------------------------------------------------------------------------
@@ -86,11 +90,6 @@ protected:
     virtual void render() = 0;
 
     //----------------------------------------------------------------------------------------
-    /// @see Component::resized.
-    //----------------------------------------------------------------------------------------
-    void resized() override;
-
-    //----------------------------------------------------------------------------------------
     /// @see MouseListener::mouseEnter.
     //----------------------------------------------------------------------------------------
     void mouseEnter(const MouseEvent& event) override;
@@ -112,13 +111,13 @@ protected:
         fftBins = fftSize >> 1 // fftSize / 2
     };
 
-    // Overlay GUI
-    Label m_statusLabel;					/// GUI label used to display various informations about the current state of the spectrogram.
+    StatusBar& m_statusBar;                 /// Reference to the status bar (GUI). The component should be updated in a derived class.
+
     FrequencyAxis<float> m_frequencyAxis;	/// Frequency axis used for frequency data scaling.
     ColorMap m_colorMap;					/// Color map used for the normalized levels.
 
     std::atomic_bool m_isMouseHover = {};	/// If true, the mouse is inside the display frame. If false, the mouse is out of bounds.
-    Point<int> m_mousePosition;				/// Current mouse position in local coordinates.
+    Point<int> m_mousePosition;				/// Current mouse position in local coordinates (relative to the bottom left corner).
 
 private:
     enum class InterpolationMode

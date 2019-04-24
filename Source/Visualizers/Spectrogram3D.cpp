@@ -5,13 +5,14 @@
 //--------------------------------------------------------------------------------------------
 
 #include "Spectrogram3D.h"
+#include "StatusBar.h"
 #include "DSP/Filters.h"
 #include <numeric>
 
-Spectrogram3D::Spectrogram3D(double sampleRate)
-    : Spectrogram(sampleRate, 256)
+Spectrogram3D::Spectrogram3D(double sampleRate, StatusBar& statusBar)
+    : Spectrogram(sampleRate, 256, statusBar)
     , m_spectrogramImage(Image::ARGB, m_frequencyAxis.getResolution(), m_frequencyAxis.getResolution(), false)
-    , m_draggableOrientation(10.0f)
+    , m_draggableOrientation(11.0f)
 {
     m_backgroundColor = Colour::fromRGB(25, 25, 25);
 }
@@ -88,8 +89,7 @@ void Spectrogram3D::createShaders()
         ;
     
     auto newShader = std::make_unique<OpenGLShaderProgram>(m_openGLContext);
-    String statusText;
-
+    
     if (newShader->addVertexShader(vertexShader) &&
         newShader->addFragmentShader(fragmentShader) &&
         newShader->link())
@@ -97,15 +97,11 @@ void Spectrogram3D::createShaders()
         m_shader = std::move(newShader);
         m_shader->use();
         m_uniforms = std::make_unique<Uniforms>(*m_shader);
-
-        statusText = "GLSL: v" + String(OpenGLShaderProgram::getLanguageVersion(), 2);
     }
     else
     {
-        statusText = newShader->getLastError();
+        jassertfalse;
     }
-
-    //statusLabel.setText(statusText, dontSendNotification);
 }
 
 void Spectrogram3D::render()
@@ -118,11 +114,11 @@ void Spectrogram3D::render()
     // Calculate new y values and shift old y values back
     for (int y = 0; y < m_frequencyAxis.getResolution(); ++y)
     {
-        const auto frequencyInfo = getFrequencyInfo(y);
         const int j = m_frequencyAxis.getResolution() - y - 1;
-        const auto pixelColor = m_colorMap.getColorAtPosition(1.0f - frequencyInfo.level);
+        const auto frequencyInfo = getFrequencyInfo(y);
+        const auto pixelColor = m_colorMap.getColorAtPosition(frequencyInfo.normalizedLevel);
         // Alpha channel is used for height. If the level exceeds 1.0, it gets clipped
-        m_spectrogramImage.setPixelAt(rightHandEdge, j, Colour::fromFloatRGBA(pixelColor.x, pixelColor.y, pixelColor.z, frequencyInfo.level));
+        m_spectrogramImage.setPixelAt(rightHandEdge, j, Colour::fromFloatRGBA(pixelColor.x, pixelColor.y, pixelColor.z, frequencyInfo.normalizedLevel));
     }
 
     m_spectrogramTexture.loadImage(m_spectrogramImage);
