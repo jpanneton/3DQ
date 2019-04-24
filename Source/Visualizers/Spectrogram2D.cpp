@@ -24,12 +24,8 @@ Spectrogram2D::~Spectrogram2D()
 
 void Spectrogram2D::initialise()
 {
-    const Rectangle<int> bounds = m_spectrogramImage.getBounds();
-    const GLshort left = static_cast<GLshort>(bounds.getX());
-    const GLshort top = static_cast<GLshort>(bounds.getY());
-    const GLshort right = static_cast<GLshort>(bounds.getRight());
-    const GLshort bottom = static_cast<GLshort>(bounds.getBottom());
-    const GLshort vertices[] = { left, bottom, right, bottom, left, top, right, top };
+    // Vertices in normalized device coordinates
+    const GLfloat vertices[] = { -1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 1.0f };
 
     // Generate buffers
     m_openGLContext.extensions.glGenVertexArrays(1, &m_VAO);
@@ -43,7 +39,7 @@ void Spectrogram2D::initialise()
     m_openGLContext.extensions.glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
     // Define how the data should be pushed to the vertex shader
-    m_openGLContext.extensions.glVertexAttribPointer(0, 2, GL_SHORT, GL_FALSE, 4, nullptr);
+    m_openGLContext.extensions.glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
     m_openGLContext.extensions.glEnableVertexAttribArray(0);
 
     m_spectrogramImage.clear(m_spectrogramImage.getBounds(), Colours::black);
@@ -77,7 +73,6 @@ void Spectrogram2D::createShaders()
     {
         m_shader = std::move(newShader);
         m_shader->use();
-        m_uniforms = std::make_unique<Uniforms>(*m_shader);
     }
     else
     {
@@ -97,8 +92,9 @@ void Spectrogram2D::render()
     {
         const int j = m_frequencyAxis.getResolution() - y - 1;
         const auto frequencyInfo = getFrequencyInfo(y);
-        const auto pixelColor = m_colorMap.getColorAtPosition(frequencyInfo.normalizedLevel);
-        m_spectrogramImage.setPixelAt(rightHandEdge, j, Colour::fromFloatRGBA(pixelColor.x, pixelColor.y, pixelColor.z, 1.0f));
+        const auto color = m_colorMap.getColorAtPosition(frequencyInfo.normalizedLevel);
+        const auto texelValue = Colour::fromFloatRGBA(color.x, color.y, color.z, 1.0f);
+        m_spectrogramImage.setPixelAt(rightHandEdge, j, texelValue);
     }
 
     if (m_isMouseHover)
@@ -112,19 +108,8 @@ void Spectrogram2D::render()
         m_statusBar.update(m_fps, 0.0f, 0.0f);
     }
     
-    const Rectangle<int> bounds = m_spectrogramImage.getBounds();
     m_spectrogramTexture.loadImage(m_spectrogramImage);
     
-    const GLfloat textureBounds[] = {
-        static_cast<GLfloat>(bounds.getX()),	 // Left
-        static_cast<GLfloat>(bounds.getY()),	 // Top
-        static_cast<GLfloat>(bounds.getWidth()), // Right
-        static_cast<GLfloat>(bounds.getHeight()) // Bottom
-    };
-
-    getUniforms()->screenSize.set(textureBounds[2], textureBounds[3]);
-    getUniforms()->textureBounds.set(textureBounds, 4);
-
     // GL_TEXTURE0 is activated by default
     m_spectrogramTexture.bind();
     m_openGLContext.extensions.glBindVertexArray(m_VAO);

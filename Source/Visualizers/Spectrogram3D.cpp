@@ -116,9 +116,10 @@ void Spectrogram3D::render()
     {
         const int j = m_frequencyAxis.getResolution() - y - 1;
         const auto frequencyInfo = getFrequencyInfo(y);
-        const auto pixelColor = m_colorMap.getColorAtPosition(frequencyInfo.normalizedLevel);
+        const auto color = m_colorMap.getColorAtPosition(frequencyInfo.normalizedLevel);
         // Alpha channel is used for height. If the level exceeds 1.0, it gets clipped
-        m_spectrogramImage.setPixelAt(rightHandEdge, j, Colour::fromFloatRGBA(pixelColor.x, pixelColor.y, pixelColor.z, frequencyInfo.normalizedLevel));
+        const auto texelValue = Colour::fromFloatRGBA(color.x, color.y, color.z, frequencyInfo.normalizedLevel);
+        m_spectrogramImage.setPixelAt(rightHandEdge, j, texelValue);
     }
 
     m_spectrogramTexture.loadImage(m_spectrogramImage);

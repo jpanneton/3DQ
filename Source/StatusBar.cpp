@@ -16,7 +16,7 @@ StatusBar::StatusBar()
 void StatusBar::update(unsigned int fps, float frequency, float level)
 {
     // Parameters must be captured by copy! Otherwise, referenced parameters will be invalid at call time.
-    MessageManager::callAsync([&, fps, frequency]
+    MessageManager::callAsync([&, fps, frequency, level]
     {
         m_fpsLabel.setText("FPS: " + String(fps), NotificationType::dontSendNotification);
         m_frequencyLabel.setText("Frequency: " + String(frequency), NotificationType::dontSendNotification);
