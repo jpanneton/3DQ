@@ -121,6 +121,8 @@ void Spectrogram3D::render()
         m_spectrogramImage.setPixelAt(rightHandEdge, j, texelValue);
     }
 
+    m_statusBar.update(m_fps, 0.0f, 0.0f);
+
     m_spectrogramTexture.loadImage(m_spectrogramImage);
 
     Matrix3D<float> scale;

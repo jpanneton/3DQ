@@ -116,7 +116,7 @@ protected:
     AudioBuffer<float> m_readBuffer;	/// Temporary buffer to store the latest ring buffer's audio frame.
     const double m_sampleRate = 0.0;    /// Sample rate.
 
-    unsigned int m_fps = 0;
+    unsigned int m_fps = 0;             /// Number of frames rendered per second.
 
 private:
     //----------------------------------------------------------------------------------------
@@ -134,9 +134,9 @@ private:
     //----------------------------------------------------------------------------------------
     void openGLContextClosing() override;
 
-    double m_lastTimePoint = {};
-    double m_ellapsedTime = {};
-    unsigned int m_fpsCounter = 0;
+    double m_lastTimePoint = {};        /// Last time point (in ms).
+    double m_ellapsedTime = {};         /// Elapsed time since last time point (in ms).
+    unsigned int m_fpsCounter = 0;      /// FPS counter used to update m_fps each second.
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OpenGLComponent)
 };

@@ -28,6 +28,7 @@
               file="Source/Utilities/AbstractRingBuffer.h"/>
         <FILE id="rUUz8I" name="ColorGradients.h" compile="0" resource="0"
               file="Source/Utilities/ColorGradients.h"/>
+        <FILE id="H1fEM1" name="ColorMap.cpp" compile="1" resource="0" file="Source/Utilities/ColorMap.cpp"/>
         <FILE id="IjjEpy" name="ColorMap.h" compile="0" resource="0" file="Source/Utilities/ColorMap.h"/>
         <FILE id="KKWJBk" name="DraggableOrbitCamera.h" compile="0" resource="0"
               file="Source/Utilities/DraggableOrbitCamera.h"/>
