@@ -95,13 +95,12 @@ private:
     struct Uniforms : public ShaderUniforms
     {
         Uniforms(OpenGLShaderProgram& shaderProgram)
-            : imageTexture(shaderProgram, "imageTexture")
-            , projectionMatrix(shaderProgram, "projectionMatrix")
+            : projectionMatrix(shaderProgram, "projectionMatrix")
             , viewMatrix(shaderProgram, "viewMatrix")
         {
         }
 
-        Uniform imageTexture, projectionMatrix, viewMatrix;
+        Uniform projectionMatrix, viewMatrix;
     };
 
     GLfloat m_xFreqWidth;				/// Frequency axis size.

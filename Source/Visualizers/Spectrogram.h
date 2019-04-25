@@ -33,20 +33,20 @@ public:
     virtual ~Spectrogram();
 
     //----------------------------------------------------------------------------------------
-    /// Set the maximum frequency of the spectrogram to better visualize the according range.
+    /// Sets the maximum frequency of the spectrogram to better visualize the according range.
     /// @param[in] frequency                Maximum frequency.
     /// @param[in] gradient                 Color gradient to use as a colormap.
     //----------------------------------------------------------------------------------------
     void setMaxFrequency(float frequency, const ColourGradient& gradient);
 
     //----------------------------------------------------------------------------------------
-    /// Set the adaptive level mode on or off.
+    /// Sets the adaptive level mode on or off.
     /// @param[in] enabled                  If true, the level is normalized using min et max levels. If false, the original level is used for visualization.
     //----------------------------------------------------------------------------------------
     void setAdaptiveLevel(bool enabled);
 
     //----------------------------------------------------------------------------------------
-    /// Set the clip level mode on or off.
+    /// Sets the clip level mode on or off.
     /// @param[in] enabled                  If true, the level is clipped to 0 dB. If false, the level is clipped to an arbitrary positive dB value.
     //----------------------------------------------------------------------------------------
     void setClipLevel(bool enabled);

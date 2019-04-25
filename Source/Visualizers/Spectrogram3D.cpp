@@ -9,8 +9,8 @@
 #include "GUI/StatusBar.h"
 
 Spectrogram3D::Spectrogram3D(double sampleRate, StatusBar& statusBar)
-    : Spectrogram(sampleRate, 256, statusBar)
-    , m_spectrogramImage(Image::ARGB, m_frequencyAxis.getResolution(), m_frequencyAxis.getResolution(), false)
+    : Spectrogram(sampleRate, 512, statusBar)
+    , m_spectrogramImage(Image::ARGB, m_frequencyAxis.getResolution() / 2, m_frequencyAxis.getResolution(), false)
     , m_draggableOrientation(11.0f)
 {
     m_backgroundColor = Colour::fromRGB(25, 25, 25);
