@@ -33,7 +33,6 @@
         <FILE id="KKWJBk" name="DraggableOrbitCamera.h" compile="0" resource="0"
               file="Source/Utilities/DraggableOrbitCamera.h"/>
         <FILE id="b22CxN" name="FrequencyAxis.h" compile="0" resource="0" file="Source/Utilities/FrequencyAxis.h"/>
-        <FILE id="Jzyxma" name="LockFreeQueue.h" compile="0" resource="0" file="Source/Utilities/LockFreeQueue.h"/>
         <FILE id="ssxnIK" name="Math.h" compile="0" resource="0" file="Source/Utilities/Math.h"/>
         <FILE id="Aur3WJ" name="NormalizedRange.h" compile="0" resource="0"
               file="Source/Utilities/NormalizedRange.h"/>
